@@ -1,3 +1,77 @@
+// ==========================================
+// CONFIGURAÇÃO DO FIREBASE
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
+    authDomain: "controle-financas-9c015.firebaseapp.com",
+    projectId: "controle-financas-9c015",
+    storageBucket: "controle-financas-9c015.firebasestorage.app",
+    messagingSenderId: "317294408562",
+    appId: "1:317294408562:web:b6d16b5774512c06dee3eb",
+    measurementId: "G-V0L9V3ZHBW"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let isSyncingFromCloud = false;
+
+// ==========================================
+// AUTENTICAÇÃO GOOGLE & SINCRONIZAÇÃO EM TEMPO REAL
+// ==========================================
+function handleGoogleAuth() {
+    if (currentUser) {
+        if (confirm(`Conectado como ${currentUser.email}.\nDeseja sair da conta?`)) {
+            auth.signOut();
+        }
+    } else {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => {
+            console.error("Erro no login Google:", err);
+            alert("Não foi possível conectar com o Google: " + err.message);
+        });
+    }
+}
+
+function updateAuthUI(user) {
+    const avatar = document.getElementById('google-user-avatar');
+    const label = document.getElementById('lbl-google-auth');
+    if (!avatar || !label) return;
+
+    if (user) {
+        avatar.src = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+        label.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Conectado';
+    } else {
+        avatar.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+        label.innerText = 'Entrar';
+    }
+}
+
+const originalSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+    originalSetItem(key, value);
+    if (currentUser && !isSyncingFromCloud && key.startsWith('finc_')) {
+        syncLocalToCloud();
+    }
+};
+
+function syncLocalToCloud() {
+    if (!currentUser) return;
+    const payload = {
+        transactions: JSON.parse(localStorage.getItem('finc_transactions') || '[]'),
+        categories: JSON.parse(localStorage.getItem('finc_categories') || '[]'),
+        methods: JSON.parse(localStorage.getItem('finc_methods') || '[]'),
+        shoppingList: JSON.parse(localStorage.getItem('finc_shopping_list') || '[]'),
+        targetsList: JSON.parse(localStorage.getItem('finc_targets_list') || '[]'),
+        activeCurrencies: JSON.parse(localStorage.getItem('finc_active_currencies') || '["JPY","BRL","USD","EUR"]'),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('users').doc(currentUser.uid).set(payload, { merge: true })
+        .catch(err => console.error("Erro ao salvar na nuvem:", err));
+}
+
 auth.onAuthStateChanged(async (user) => {
     currentUser = user;
     updateAuthUI(user);

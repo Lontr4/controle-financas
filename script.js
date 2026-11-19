@@ -1,127 +1,6 @@
 // ==========================================
-// CONFIGURAÇÃO DO FIREBASE
+// 1. DADOS E CONFIGURAÇÕES INICIAIS
 // ==========================================
-const firebaseConfig = {
-    apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
-    authDomain: "controle-financas-9c015.firebaseapp.com",
-    projectId: "controle-financas-9c015",
-    storageBucket: "controle-financas-9c015.firebasestorage.app",
-    messagingSenderId: "317294408562",
-    appId: "1:317294408562:web:b6d16b5774512c06dee3eb",
-    measurementId: "G-V0L9V3ZHBW"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-let currentUser = null;
-let isSyncingFromCloud = false;
-
-// ==========================================
-// AUTENTICAÇÃO GOOGLE & SINCRONIZAÇÃO EM TEMPO REAL
-// ==========================================
-function handleGoogleAuth() {
-    if (currentUser) {
-        if (confirm(`Conectado como ${currentUser.email}.\nDeseja sair da conta?`)) {
-            auth.signOut();
-        }
-    } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(err => {
-            console.error("Erro no login Google:", err);
-            alert("Não foi possível conectar com o Google: " + err.message);
-        });
-    }
-}
-
-function updateAuthUI(user) {
-    const avatar = document.getElementById('google-user-avatar');
-    const label = document.getElementById('lbl-google-auth');
-    if (!avatar || !label) return;
-
-    if (user) {
-        avatar.src = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-        label.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Conectado';
-    } else {
-        avatar.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-        label.innerText = 'Entrar';
-    }
-}
-
-const originalSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-    originalSetItem(key, value);
-    if (currentUser && !isSyncingFromCloud && key.startsWith('finc_')) {
-        syncLocalToCloud();
-    }
-};
-
-function syncLocalToCloud() {
-    if (!currentUser) return;
-    const payload = {
-        transactions: JSON.parse(localStorage.getItem('finc_transactions') || '[]'),
-        categories: JSON.parse(localStorage.getItem('finc_categories') || '[]'),
-        methods: JSON.parse(localStorage.getItem('finc_methods') || '[]'),
-        shoppingList: JSON.parse(localStorage.getItem('finc_shopping_list') || '[]'),
-        targetsList: JSON.parse(localStorage.getItem('finc_targets_list') || '[]'),
-        activeCurrencies: JSON.parse(localStorage.getItem('finc_active_currencies') || '["JPY","BRL","USD","EUR"]'),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    db.collection('users').doc(currentUser.uid).set(payload, { merge: true })
-        .catch(err => console.error("Erro ao salvar na nuvem:", err));
-}
-
-auth.onAuthStateChanged(async (user) => {
-    currentUser = user;
-    updateAuthUI(user);
-
-    if (user) {
-        const docRef = db.collection('users').doc(user.uid);
-        const snap = await docRef.get();
-
-        if (!snap.exists && (transactions.length > 0 || shoppingList.length > 0 || getTargets().length > 0)) {
-            syncLocalToCloud();
-        }
-
-        docRef.onSnapshot((doc) => {
-            if (!doc.exists || doc.metadata.hasPendingWrites) return;
-            const data = doc.data();
-            isSyncingFromCloud = true;
-
-            if (data.transactions) {
-                transactions = data.transactions;
-                originalSetItem('finc_transactions', JSON.stringify(transactions));
-            }
-            if (data.categories && data.categories.length) {
-                categories = data.categories;
-                originalSetItem('finc_categories', JSON.stringify(categories));
-            }
-            if (data.methods && data.methods.length) {
-                methods = data.methods;
-                originalSetItem('finc_methods', JSON.stringify(methods));
-            }
-            if (data.shoppingList) {
-                shoppingList = data.shoppingList;
-                originalSetItem('finc_shopping_list', JSON.stringify(shoppingList));
-            }
-            if (data.targetsList) {
-                originalSetItem('finc_targets_list', JSON.stringify(data.targetsList));
-            }
-            if (data.activeCurrencies) {
-                activeCurrencies = data.activeCurrencies;
-                originalSetItem('finc_active_currencies', JSON.stringify(activeCurrencies));
-            }
-
-            isSyncingFromCloud = false;
-
-            if (typeof populateMonthFilterOptions === 'function') populateMonthFilterOptions();
-            if (typeof renderDashboard === 'function') renderDashboard();
-            if (typeof renderTransactionsTable === 'function') renderTransactionsTable();
-            if (typeof renderShoppingList === 'function') renderShoppingList();
-        });
-    }
-});
 const i18n = {
     'pt-BR': {
         appTitle: "Controle de Finanças",
@@ -234,7 +113,7 @@ const i18n = {
         btnAddShop: "Adicionar",
         shopPendingCount: "Itens na Lista",
         btnClearChecked: "Limpar Marcados",
-        changelogTitle: "Notas de Atualização (v2.2)",
+        changelogTitle: "Notas de Atualização (v2.3)",
         shopItemCat: "Categoria",
         shopCategories: {
             breakfast: "☕ Café da Manhã",
@@ -243,10 +122,9 @@ const i18n = {
             hygiene: "🧴 Higiene / Outros"
         },
         changelogItems: [
+            "Sincronização em nuvem em tempo real via Conta Google.",
             "Nova aba Lista de Compras integrada com lançamento direto em despesas.",
             "Filtro 'Todos os Anos' adicionado ao gráfico comparativo anual.",
-            "Tradução completa dos seletores de backup e status nos 4 idiomas.",
-            "Fechamento automático das janelas ao salvar transações e metas.",
             "Transações recorrentes e filtro de busca por intervalo de datas."
         ],
         categories: { 1: "Aluguel", 2: "Gás", 3: "Energia", 4: "Internet Celular", 5: "Internet Casa", 6: "Água", 7: "Saúde", 8: "Alimentação", 9: "Academia", 10: "Escola", 11: "Entrada / Salário", 12: "Hobby / Lazer", 13: "Outros" },
@@ -363,19 +241,18 @@ const i18n = {
         btnAddShop: "Add",
         shopPendingCount: "Items in List",
         btnClearChecked: "Clear Checked",
-        changelogTitle: "Update Notes (v2.2)",
+        changelogTitle: "Update Notes (v2.3)",
         shopItemCat: "Category",
-       shopCategories: {
+        shopCategories: {
             breakfast: "☕ Breakfast",
             kitchen: "🍳 Kitchen / Pantry",
             cleaning: "🧼 Cleaning",
             hygiene: "🧴 Hygiene / Others"
         },
         changelogItems: [
+            "Real-time cloud sync via Google Account.",
             "New Shopping List tab with one-click expense logging.",
             "'All Years' filter added to the annual comparison chart.",
-            "Full translation of backup and payment status dropdowns.",
-            "Auto-closing windows upon saving transactions and goals.",
             "Monthly recurring transactions and date range filters."
         ],
         categories: { 1: "Rent", 2: "Gas", 3: "Electricity", 4: "Mobile Internet", 5: "Home Internet", 6: "Water", 7: "Healthcare", 8: "Food / Groceries", 9: "Gym", 10: "School / Education", 11: "Income / Salary", 12: "Hobby / Leisure", 13: "Others" },
@@ -492,19 +369,18 @@ const i18n = {
         btnAddShop: "追加",
         shopPendingCount: "リスト内の商品",
         btnClearChecked: "チェック済みを削除",
-        changelogTitle: "更新履歴 (v2.2)",
+        changelogTitle: "更新履歴 (v2.3)",
         shopItemCat: "カテゴリ",
         shopCategories: {
-    breakfast: "☕ 朝食",
-    kitchen: "🍳 キッチン・常備品",
-    cleaning: "🧼 掃除・洗剤",
-    hygiene: "🧴 日用品・その他"
-},
+            breakfast: "☕ 朝食",
+            kitchen: "🍳 キッチン・常備品",
+            cleaning: "🧼 掃除・洗剤",
+            hygiene: "🧴 日用品・その他"
+        },
         changelogItems: [
+            "Googleアカウントによるリアルタイムクラウド同期機能。",
             "支出に直接登録できる「買い物リスト」タブを新設。",
             "年間比較グラフに「すべての年」フィルターを追加。",
-            "バックアップ頻度および支払い状態の選択肢を4言語に翻訳。",
-            "保存処理完了時のモーダル自動クローズ機能。",
             "固定費の自動繰り返しと日付範囲フィルター機能。"
         ],
         categories: { 1: "家賃", 2: "ガス代", 3: "電気代", 4: "携帯通信費", 5: "固定回線", 6: "水道代", 7: "医療・健康", 8: "食費", 9: "ジム・フィットネス", 10: "教育・学費", 11: "給与・収入", 12: "趣味・娯楽", 13: "その他" },
@@ -526,7 +402,7 @@ const i18n = {
         subIncome: "Entradas del periodo",
         subExpense: "Salidas del periodo",
         chartTitle: "Gastos por Categoría",
-        overview: "Visión General (Todos os Meses)",
+        overview: "Visión General (Todos los Meses)",
         recentTx: "Últimas Transacciones",
         txTableTitle: "Extracto Detallado",
         txTableSub: "Relación completa de transacciones en la moneda seleccionada",
@@ -621,19 +497,18 @@ const i18n = {
         btnAddShop: "Agregar",
         shopPendingCount: "Artículos en Lista",
         btnClearChecked: "Limpiar Marcados",
-        changelogTitle: "Notas de Actualización (v2.2)",
+        changelogTitle: "Notas de Actualización (v2.3)",
         shopItemCat: "Categoría",
-shopCategories: {
-    breakfast: "☕ Desayuno",
-    kitchen: "🍳 Cocina / Despensa",
-    cleaning: "🧼 Limpieza",
-    hygiene: "🧴 Higiene / Otros"
-},
+        shopCategories: {
+            breakfast: "☕ Desayuno",
+            kitchen: "🍳 Cocina / Despensa",
+            cleaning: "🧼 Limpieza",
+            hygiene: "🧴 Higiene / Otros"
+        },
         changelogItems: [
+            "Sincronización en la nube en tiempo real con Cuenta Google.",
             "Nueva pestaña Lista de Compras con registro directo de gastos.",
             "Filtro 'Todos los Años' añadido al gráfico comparativo anual.",
-            "Traducción completa de los selectores de respaldo y estado.",
-            "Cierre automático de ventanas al guardar transacciones y metas.",
             "Transacciones recurrentes mensuales y filtros por rango de fechas."
         ],
         categories: { 1: "Alquiler", 2: "Gas", 3: "Electricidad", 4: "Internet Móvil", 5: "Internet Hogar", 6: "Agua", 7: "Salud", 8: "Alimentación", 9: "Gimnasio", 10: "Escuela / Educación", 11: "Ingreso / Salario", 12: "Hobby / Ocio", 13: "Otros" },
@@ -712,6 +587,145 @@ let shoppingList = JSON.parse(localStorage.getItem('finc_shopping_list')) || [
 let myChart = null;
 let annualChart = null;
 
+// ==========================================
+// 2. CONFIGURAÇÃO DO FIREBASE & CLOUD SYNC
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
+    authDomain: "controle-financas-9c015.firebaseapp.com",
+    projectId: "controle-financas-9c015",
+    storageBucket: "controle-financas-9c015.firebasestorage.app",
+    messagingSenderId: "317294408562",
+    appId: "1:317294408562:web:b6d16b5774512c06dee3eb",
+    measurementId: "G-V0L9V3ZHBW"
+};
+
+let auth = null;
+let db = null;
+let currentUser = null;
+let isSyncingFromCloud = false;
+
+if (typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+}
+
+function handleGoogleAuth() {
+    if (!auth) {
+        alert("O módulo de autenticação ainda está carregando. Tente novamente em alguns segundos.");
+        return;
+    }
+    if (currentUser) {
+        if (confirm(`Conectado como ${currentUser.email}.\nDeseja sair da conta?`)) {
+            auth.signOut();
+        }
+    } else {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => {
+            console.error("Erro no login Google:", err);
+            alert("Não foi possível conectar com o Google: " + err.message);
+        });
+    }
+}
+
+function updateAuthUI(user) {
+    const avatar = document.getElementById('google-user-avatar');
+    const label = document.getElementById('lbl-google-auth');
+    if (!avatar || !label) return;
+
+    if (user) {
+        avatar.src = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+        label.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Conectado';
+    } else {
+        avatar.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+        label.innerText = 'Entrar';
+    }
+}
+
+const originalSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+    originalSetItem(key, value);
+    if (currentUser && !isSyncingFromCloud && key.startsWith('finc_')) {
+        syncLocalToCloud();
+    }
+};
+
+function syncLocalToCloud() {
+    if (!currentUser || !db) return;
+    const payload = {
+        transactions: JSON.parse(localStorage.getItem('finc_transactions') || '[]'),
+        categories: JSON.parse(localStorage.getItem('finc_categories') || '[]'),
+        methods: JSON.parse(localStorage.getItem('finc_methods') || '[]'),
+        shoppingList: JSON.parse(localStorage.getItem('finc_shopping_list') || '[]'),
+        targetsList: JSON.parse(localStorage.getItem('finc_targets_list') || '[]'),
+        activeCurrencies: JSON.parse(localStorage.getItem('finc_active_currencies') || '["JPY","BRL","USD","EUR"]'),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('users').doc(currentUser.uid).set(payload, { merge: true })
+        .catch(err => console.error("Erro ao salvar na nuvem:", err));
+}
+
+if (auth) {
+    auth.onAuthStateChanged(async (user) => {
+        currentUser = user;
+        updateAuthUI(user);
+
+        if (user && db) {
+            const docRef = db.collection('users').doc(user.uid);
+            const snap = await docRef.get();
+
+            if (!snap.exists && (transactions.length > 0 || shoppingList.length > 0 || getTargets().length > 0)) {
+                syncLocalToCloud();
+            }
+
+            docRef.onSnapshot((doc) => {
+                if (!doc.exists || doc.metadata.hasPendingWrites) return;
+                const data = doc.data();
+                isSyncingFromCloud = true;
+
+                if (data.transactions) {
+                    transactions = data.transactions;
+                    originalSetItem('finc_transactions', JSON.stringify(transactions));
+                }
+                if (data.categories && data.categories.length) {
+                    categories = data.categories;
+                    originalSetItem('finc_categories', JSON.stringify(categories));
+                }
+                if (data.methods && data.methods.length) {
+                    methods = data.methods;
+                    originalSetItem('finc_methods', JSON.stringify(methods));
+                }
+                if (data.shoppingList) {
+                    shoppingList = data.shoppingList;
+                    originalSetItem('finc_shopping_list', JSON.stringify(shoppingList));
+                }
+                if (data.targetsList) {
+                    originalSetItem('finc_targets_list', JSON.stringify(data.targetsList));
+                }
+                if (data.activeCurrencies) {
+                    activeCurrencies = data.activeCurrencies;
+                    originalSetItem('finc_active_currencies', JSON.stringify(activeCurrencies));
+                }
+
+                isSyncingFromCloud = false;
+
+                populateMonthFilterOptions();
+                renderWalletCards();
+                renderDashboard();
+                renderTransactionsTable();
+                renderShoppingList();
+            });
+        }
+    });
+}
+
+// ==========================================
+// 3. FUNÇÕES PRINCIPAIS DO SISTEMA
+// ==========================================
 function processRecurringTransactions() {
     const today = new Date();
     const currentMonthStr = today.toISOString().substring(0, 7);
@@ -1515,33 +1529,6 @@ function saveShoppingList() {
     triggerAutoBackup();
 }
 
-function addShoppingItem(e) {
-    e.preventDefault();
-    const nameInput = document.getElementById('shop-item-name');
-    const qtyInput = document.getElementById('shop-item-qty');
-    const priceInput = document.getElementById('shop-item-price');
-
-    const name = nameInput.value.trim();
-    const qty = qtyInput.value.trim() || '1';
-    const price = parseFloat(priceInput.value) || 0;
-
-    if (!name) return;
-
-    shoppingList.unshift({
-        id: Date.now(),
-        name,
-        qty,
-        price,
-        checked: false,
-        currency: currentCurrency
-    });
-
-    nameInput.value = '';
-    qtyInput.value = '1';
-    priceInput.value = '';
-    saveShoppingList();
-}
-
 function toggleShoppingItem(id) {
     const item = shoppingList.find(i => i.id === id);
     if (item) {
@@ -1549,6 +1536,7 @@ function toggleShoppingItem(id) {
         saveShoppingList();
     }
 }
+
 function updateShoppingCategoryDropdown() {
     const t = i18n[currentLang] || i18n['pt-BR'];
     const catSelect = document.getElementById('shop-item-cat');
@@ -1562,6 +1550,7 @@ function updateShoppingCategoryDropdown() {
         .join('');
     catSelect.value = currentVal;
 }
+
 function addShoppingItem(e) {
     e.preventDefault();
     const nameInput = document.getElementById('shop-item-name');
@@ -1600,6 +1589,7 @@ function updateShoppingItemQty(id, newQty) {
         saveShoppingList();
     }
 }
+
 function stepShoppingItemQty(id, delta) {
     const item = shoppingList.find(i => i.id === id);
     if (!item) return;
@@ -1707,6 +1697,7 @@ function renderShoppingList() {
 
     container.innerHTML = html;
 }
+
 function finishShoppingAndRecord() {
     const checkedItems = shoppingList.filter(i => i.checked && (i.currency || currentCurrency) === currentCurrency);
     if (checkedItems.length === 0) {
@@ -1760,7 +1751,6 @@ function finishShoppingAndRecord() {
         switchTab('transactions');
     }
 }
-
 
 // ==========================================
 // MÓDULO: METAS FINANCEIRAS
@@ -2059,6 +2049,7 @@ function updateCategoryDropdowns() {
         catFilter.value = currentValue;
     }
 }
+
 function updateMethodDropdowns() {
     const t = i18n[currentLang] || i18n['pt-BR'];
 
@@ -2082,7 +2073,6 @@ function updateMethodDropdowns() {
         shopMethodSelect.value = currentShopMethod;
     }
 }
-
 
 function openModal(id) { 
     const modal = document.getElementById(id);
@@ -2118,7 +2108,7 @@ function resetData() {
 
 function triggerAutoBackup() {
     const backupData = {
-        version: "2.2",
+        version: "2.3",
         autoBackupDate: new Date().toISOString(),
         categories,
         methods,
@@ -2185,7 +2175,7 @@ function sendByEmail() {
 
 function exportBackup() {
     const backupData = {
-        version: "2.2",
+        version: "2.3",
         exportDate: new Date().toISOString(),
         categories,
         methods,
@@ -2238,10 +2228,12 @@ function importBackup(event) {
     };
     reader.readAsText(file);
 }
+
 function getNumericQty(qtyStr) {
     const match = String(qtyStr || '1').trim().match(/^(\d+(?:[.,]\d+)?)/);
     return match ? parseFloat(match[1].replace(',', '.')) : 1;
 }
+
 function updateShoppingItemPrice(id, newPrice) {
     const item = shoppingList.find(i => i.id === id);
     if (item) {
@@ -2252,6 +2244,7 @@ function updateShoppingItemPrice(id, newPrice) {
         triggerAutoBackup();
     }
 }
+
 function updateShoppingCartTotalDisplay() {
     const totalEl = document.getElementById('shop-total-amount');
     if (!totalEl) return;

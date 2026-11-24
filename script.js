@@ -619,7 +619,15 @@ function startFirestoreSync(uid) {
             renderWalletCards();
             renderDashboard();
             renderTransactionsTable();
-            renderShoppingModule();
+
+            // Só atualiza visualmente a lista de compras se o usuário não estiver digitando em um campo agora
+            const activeTag = document.activeElement ? document.activeElement.tagName : '';
+            if (activeTag !== 'INPUT') {
+                renderShoppingModule();
+            } else {
+                updateShoppingCartTotal();
+            }
+
             updateSaveIndicator();
         } else {
             pushStateToCloud();
@@ -904,13 +912,24 @@ function toggleShoppingItem(id) {
     renderShoppingModule();
 }
 
+let priceSaveTimeout = null;
+
 function updateShoppingItemPrice(id, val) {
     const item = shoppingItems.find(i => i.id === id);
     if (!item) return;
+
     item.price = parseFloat(val) || 0;
     if (item.price > 0) item.checked = true;
-    pushStateToCloud();
+
+    // Atualiza apenas o total no topo sem destruir o input onde você está digitando
     updateShoppingCartTotal();
+    saveAllToLocalStorage();
+
+    // Aguarda 800ms após você parar de digitar para enviar para a nuvem
+    clearTimeout(priceSaveTimeout);
+    priceSaveTimeout = setTimeout(() => {
+        pushStateToCloud();
+    }, 800);
 }
 
 function deleteShoppingItem(id) {
@@ -964,9 +983,9 @@ function renderStandardShoppingList() {
                 </label>
 
                 <div class="flex items-center gap-2">
-                    <input type="number" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
-                           onchange="updateShoppingItemPrice(${item.id}, this.value)"
-                           class="w-24 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-right font-bold">
+                    <input type="number" inputmode="decimal" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
+       oninput="updateShoppingItemPrice(${item.id}, this.value)"
+       class="w-24 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-right font-bold">
                     <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 p-1">
                         <i class="fa-solid fa-trash text-xs"></i>
                     </button>
@@ -995,9 +1014,9 @@ function renderRoomsGrid() {
                         <span class="text-xs font-medium truncate ${item.checked ? 'font-bold text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}">${item.name}</span>
                     </label>
                     <div class="flex items-center gap-1.5">
-                        <input type="number" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
-                               onchange="updateShoppingItemPrice(${item.id}, this.value)"
-                               class="w-20 px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-[11px] text-right font-bold">
+                        <input type="number" inputmode="decimal" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
+       oninput="updateShoppingItemPrice(${item.id}, this.value)"
+       class="w-20 px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-[11px] text-right font-bold">
                         <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-1">
                             <i class="fa-solid fa-xmark text-xs"></i>
                         </button>

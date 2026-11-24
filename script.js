@@ -1,16 +1,7 @@
 // =========================================================================
-// 1. CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELAS SUAS CHAVES DO FIREBASE CONSOLE)
+// 1. CONFIGURAÇÃO DO FIREBASE
 // =========================================================================
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
     authDomain: "controle-financas-9c015.firebaseapp.com",
     projectId: "controle-financas-9c015",
@@ -18,12 +9,27 @@
     messagingSenderId: "317294408562",
     appId: "1:317294408562:web:f8026e4e126adab0dee3eb",
     measurementId: "G-RHHFSX6YGQ"
-  };
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+let auth = null;
+let db = null;
+let currentUser = null;
+let unsubscribeFirestore = null;
+
+try {
+    if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "SUA_API_KEY") {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+    }
+} catch (err) {
+    console.warn("Erro ao inicializar Firebase:", err);
+}
+
+// =========================================================================
+// 2. DICIONÁRIO MULTILÍNGUE (PT-BR, EN, JA, ES)
+// =========================================================================
+
 // =========================================================================
 // 2. DICIONÁRIO MULTILÍNGUE (PT-BR, EN, JA, ES)
 // =========================================================================

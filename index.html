@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-   
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -28,124 +28,119 @@
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
 
     <!-- Header Navigation -->
-    <!-- Header Navigation -->
-    <!-- Header Navigation -->
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-14 sm:h-16 gap-2">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-2">
                 
                 <!-- Logo & Title -->
-                <div class="flex items-center gap-2 min-w-0">
-                    <div class="p-1.5 sm:p-2 bg-indigo-600 text-white rounded-xl shadow-md flex-shrink-0">
-                        <i class="fa-solid fa-wallet text-base sm:text-lg"></i>
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md flex-shrink-0">
+                        <i class="fa-solid fa-wallet text-lg"></i>
                     </div>
-                    <h1 id="app-title" class="font-bold text-sm sm:text-base lg:text-lg leading-tight text-slate-900 dark:text-white truncate">
-                        Controle de Finanças
-                    </h1>
+                    <h1 id="app-title" class="font-bold text-base sm:text-lg leading-tight text-slate-900 dark:text-white truncate">Controle de Finanças</h1>
                 </div>
 
                 <!-- Navigation Tabs (Desktop) -->
-                <nav class="hidden lg:flex items-center space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-2xl shadow-inner flex-shrink-0">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn flex items-center whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-indigo-600 bg-white dark:bg-slate-800 shadow-sm dark:text-white">
-                        <i class="fa-solid fa-chart-pie mr-1.5"></i><span id="lbl-nav-dash">Painel / Dashboard</span>
+                <nav class="hidden lg:flex space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1.5 rounded-2xl shadow-inner">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-indigo-600 bg-white dark:bg-slate-800 shadow-sm dark:text-white">
+                        <i class="fa-solid fa-chart-pie mr-1.5"></i><span id="lbl-nav-dash">Painel</span>
                     </button>
-                    <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-btn flex items-center whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
+                    <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
                         <i class="fa-solid fa-list-check mr-1.5"></i><span id="lbl-nav-tx">Transações</span>
                     </button>
-                    <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn flex items-center whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
-                        <i class="fa-solid fa-cart-shopping mr-1.5"></i><span id="lbl-nav-shop">Lista de Compras</span>
+                    <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
+                        <i class="fa-solid fa-cart-shopping mr-1.5"></i><span id="lbl-nav-shop">Compras</span>
                     </button>
                 </nav>
 
                 <!-- Action Buttons & Controls -->
-                <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                <div class="flex items-center gap-1.5 sm:gap-2">
                     
                     <!-- Seletor de Idioma -->
                     <div class="relative inline-block text-left" id="dropdown-lang-container">
-                        <button onclick="toggleLangDropdown()" type="button" class="h-9 flex items-center gap-1 whitespace-nowrap bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold px-2 sm:px-2.5 rounded-xl border border-slate-200 dark:border-slate-600 transition-all shadow-sm">
+                        <button onclick="toggleLangDropdown()" type="button" class="h-9 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold px-2.5 rounded-xl border border-slate-200 dark:border-slate-600 transition-all shadow-sm">
                             <img id="current-lang-flag" src="https://flagcdn.com/w20/br.png" alt="Bandeira" class="w-4 h-3 rounded-sm object-cover">
                             <span id="current-lang-label">PT</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                         </button>
 
                         <div id="lang-dropdown-menu" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 py-1.5 transition-all">
-                            <button onclick="selectLanguage('pt-BR')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all">
+                            <button onclick="selectLanguage('pt-BR')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/br.png" alt="Brasil" class="w-4 h-3 rounded-sm object-cover">
                                 <span>Português</span>
                             </button>
-                            <button onclick="selectLanguage('en')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all">
+                            <button onclick="selectLanguage('en')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/us.png" alt="USA" class="w-4 h-3 rounded-sm object-cover">
                                 <span>English</span>
                             </button>
-                            <button onclick="selectLanguage('ja')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all">
+                            <button onclick="selectLanguage('ja')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/jp.png" alt="Japan" class="w-4 h-3 rounded-sm object-cover">
                                 <span>日本語</span>
                             </button>
-                            <button onclick="selectLanguage('es')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all">
+                            <button onclick="selectLanguage('es')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/es.png" alt="Spain" class="w-4 h-3 rounded-sm object-cover">
                                 <span>Español</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Botão Gerenciar Metas (Visível no celular como ícone) -->
-                    <button onclick="openModal('modal-target')" title="Gerenciar Metas" class="flex h-9 items-center gap-1.5 whitespace-nowrap bg-amber-500 hover:bg-amber-600 text-white px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <!-- Botão Gerenciar Metas -->
+                    <button onclick="openModal('modal-target')" title="Gerenciar Metas" class="hidden md:flex h-9 items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-bullseye"></i>
-                        <span id="btn-metas-lbl" class="hidden sm:inline">Metas</span>
+                        <span id="btn-metas-lbl">Metas</span>
                     </button>
 
                     <!-- Exportar PDF -->
-                    <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="hidden md:flex h-9 items-center gap-1.5 whitespace-nowrap bg-rose-600 hover:bg-rose-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="hidden xl:flex h-9 items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-file-pdf"></i>
                         <span>PDF</span>
                     </button>
 
                     <!-- Enviar por E-mail -->
-                    <button onclick="sendByEmail()" title="Enviar Resumo por E-mail" class="hidden md:flex h-9 items-center gap-1.5 whitespace-nowrap bg-sky-600 hover:bg-sky-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="sendByEmail()" title="Enviar Resumo por E-mail" class="hidden xl:flex h-9 items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-envelope"></i>
                         <span>E-mail</span>
                     </button>
 
-                    <!-- Nova Transação (Visível no celular como '+') -->
-                    <button onclick="openModal('modal-transaction')" title="Nova Transação" class="flex h-9 items-center gap-1.5 whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-3.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <!-- Nova Transação -->
+                    <button onclick="openModal('modal-transaction')" class="hidden sm:flex h-9 items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-plus"></i>
-                        <span id="lbl-btn-new-tx" class="hidden sm:inline">Nova Transação</span>
+                        <span id="lbl-btn-new-tx">Nova Transação</span>
                     </button>
-                    <!-- Botão Login Google / Perfil -->
-                <button onclick="handleGoogleAuth()" id="btn-google-auth" title="Sincronizar com Conta Google" class="h-9 flex items-center gap-1.5 whitespace-nowrap bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-slate-600 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
-                    <img id="google-user-avatar" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4 rounded-full object-cover">
-                    <span id="lbl-google-auth" class="hidden sm:inline">Entrar</span>
-                </button>
 
-                <!-- Botão de Definições -->
-               
+                    <!-- Botão Login Google / Perfil -->
+                    <button onclick="handleGoogleAuth()" id="btn-google-auth" title="Sincronizar com Conta Google" class="h-9 flex items-center gap-1.5 whitespace-nowrap bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-slate-600 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                        <img id="google-user-avatar" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4 rounded-full object-cover">
+                        <span id="lbl-google-auth" class="hidden sm:inline">Entrar</span>
+                    </button>
+
                     <!-- Botão de Definições -->
                     <button onclick="openModal('modal-settings')" title="Definições e Backup" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
                         <i class="fa-solid fa-gear text-sm"></i>
                     </button>
 
                     <!-- Botão Dark Mode -->
-                    <button onclick="toggleDarkMode()" id="btn-theme" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
+                    <button onclick="toggleDarkMode()" id="btn-theme" title="Alternar Tema" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
                         <i class="fa-solid fa-moon text-sm"></i>
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Mobile / Tablet Navigation -->
-            <div class="grid grid-cols-3 lg:hidden border-t border-slate-100 dark:border-slate-700 py-1.5 gap-1">
-                <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span class="truncate">Dashboard</span>
-                </button>
-                <button onclick="switchTab('transactions')" id="mob-nav-transactions" class="mob-nav-btn flex items-center justify-center gap-1.5 text-xs font-medium py-2 rounded-xl text-slate-600 dark:text-slate-300">
-                    <i class="fa-solid fa-list-check"></i>
-                    <span class="truncate">Transações</span>
-                </button>
-                <button onclick="switchTab('shopping')" id="mob-nav-shopping" class="mob-nav-btn flex items-center justify-center gap-1.5 text-xs font-medium py-2 rounded-xl text-slate-600 dark:text-slate-300">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="truncate">Compras</span>
-                </button>
-            </div>
+        <!-- Barra de Navegação Mobile/Tablet -->
+        <div class="lg:hidden border-t border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/90 px-3 py-1.5 flex items-center justify-between gap-1.5">
+            <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+                <i class="fa-solid fa-chart-pie mr-1"></i><span>Painel</span>
+            </button>
+            <button onclick="switchTab('transactions')" id="mob-nav-transactions" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300">
+                <i class="fa-solid fa-list-check mr-1"></i><span>Extrato</span>
+            </button>
+            <button onclick="switchTab('shopping')" id="mob-nav-shopping" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300">
+                <i class="fa-solid fa-cart-shopping mr-1"></i><span>Compras</span>
+            </button>
+            <button onclick="openModal('modal-transaction')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm">
+                <i class="fa-solid fa-plus"></i>
+            </button>
         </div>
     </header>
 
@@ -192,7 +187,7 @@
                 </div>
             </div>
 
-            <!-- FILTRO DE MÊS DA CONTA ATIVA -->
+            <!-- FILTRO DE MÊS -->
             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 id="lbl-summary-title" class="font-bold text-slate-900 dark:text-white text-base">Resumo Financeiro</h2>
@@ -206,26 +201,26 @@
                 </div>
             </div>
 
-            <!-- PAINEL DIVIDIDO EM METAS -->
+            <!-- PAINEL DE METAS -->
             <div id="targets-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                     <p id="lbl-card-balance" class="text-xs uppercase tracking-wider font-semibold text-slate-400">Saldo Total</p>
-                    <h3 id="card-balance" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">R$ 0,00</h3>
+                    <h3 id="card-balance" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">¥ 0</h3>
                     <span id="balance-status-badge" class="mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Balanço Positivo</span>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                     <p id="lbl-card-income" class="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">Total Receitas</p>
-                    <h3 id="card-income" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">R$ 0,00</h3>
+                    <h3 id="card-income" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">¥ 0</h3>
                     <p id="lbl-sub-income" class="mt-3 text-xs text-slate-500 dark:text-slate-400">Entradas do período</p>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                     <p id="lbl-card-expense" class="text-xs uppercase tracking-wider font-semibold text-rose-600 dark:text-rose-400">Total Despesas</p>
-                    <h3 id="card-expense" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">R$ 0,00</h3>
+                    <h3 id="card-expense" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">¥ 0</h3>
                     <p id="lbl-sub-expense" class="mt-3 text-xs text-slate-500 dark:text-slate-400">Saídas do período</p>
                 </div>
             </div>
@@ -253,7 +248,7 @@
                 </div>
             </div>
 
-            <!-- GRÁFICO COMPARATIVO ANUAL (JAN - DEZ) -->
+            <!-- GRÁFICO COMPARATIVO ANUAL -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
@@ -293,7 +288,7 @@
                     </button>
                 </div>
 
-                <!-- BARRA DE FILTROS DAS TRANSAÇÕES -->
+                <!-- BARRA DE FILTROS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
                     <div class="lg:col-span-2">
                         <input type="text" id="tx-search-input" oninput="renderTransactionsTable()" placeholder="Pesquisar por descrição ou obs..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
@@ -315,7 +310,7 @@
                             <option value="pending">⏳ Pendentes</option>
                         </select>
                     </div>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1.5">
                         <input type="date" id="tx-filter-date-start" onchange="renderTransactionsTable()" title="Data Inicial" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
                         <input type="date" id="tx-filter-date-end" onchange="renderTransactionsTable()" title="Data Final" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
                     </div>
@@ -343,61 +338,98 @@
             </div>
         </section>
 
-        <!-- TAB 3: LISTA DE COMPRAS -->
+        <!-- TAB 3: LISTA DE COMPRAS (PADRÃO + CÔMODOS DA CASA INTERLIGADOS) -->
         <section id="tab-shopping" class="hidden space-y-6">
-            <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
-    <div class="bg-slate-50 dark:bg-slate-900 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-right">
-        <span id="lbl-shop-cart-total" class="text-[10px] uppercase font-bold text-slate-400 block">Total no Carrinho</span>
-        <span id="shop-total-amount" class="text-sm sm:text-base font-extrabold text-indigo-600 dark:text-indigo-400">0</span>
-    </div>
+            
+            <!-- Cabeçalho & Resumo do Carrinho -->
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-4">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <div>
+                        <h2 id="lbl-shop-title" class="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping text-indigo-600"></i>
+                            <span>Lista de Compras & Cômodos</span>
+                        </h2>
+                        <p id="lbl-shop-sub" class="text-xs text-slate-500 dark:text-slate-400">
+                            Gerencie na lista padrão ou organize por cômodos da casa — ambos sincronizam o mesmo carrinho
+                        </p>
+                    </div>
 
-    <!-- Seletor de Método de Pagamento -->
-    <div>
-        <select id="shop-payment-method" aria-label="Método de Pagamento" class="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </select>
-    </div>
-
-    <button onclick="finishShoppingAndRecord()" class="h-10 bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-2 whitespace-nowrap">
-        <i class="fa-solid fa-check-double"></i>
-        <span id="lbl-btn-finish-shop">Concluir e Lançar Gasto</span>
-    </button>
-            </div>
-
-            <form onsubmit="addShoppingItem(event)" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-    <div class="sm:col-span-4">
-        <label id="lbl-shop-item-name" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Item / Produto</label>
-        <input type="text" id="shop-item-name" required placeholder="Ex: Café, Arroz, Detergente..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-    </div>
-    <div class="sm:col-span-3">
-        <label id="lbl-shop-item-cat" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Categoria</label>
-        <select id="shop-item-cat" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium"></select>
-    </div>
-    <div class="sm:col-span-2">
-        <label id="lbl-shop-item-qty" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Qtd.</label>
-        <input type="text" id="shop-item-qty" value="1" placeholder="Ex: 2 un, 1kg" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-    </div>
-    <div class="sm:col-span-2">
-        <label id="lbl-shop-item-price" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Preço (Opc.)</label>
-        <input type="number" step="0.01" min="0" id="shop-item-price" placeholder="0.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-    </div>
-    <div class="sm:col-span-1">
-        <button type="submit" title="Adicionar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm flex items-center justify-center">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-    </div>
-</form>
-
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                        <span id="lbl-shop-pending-count">Itens na Lista</span> (<span id="shop-items-count">0</span>)
-                    </span>
-                    <button onclick="clearCheckedShoppingItems()" class="text-xs text-rose-500 hover:underline font-medium">
-                        <i class="fa-solid fa-broom mr-1"></i><span id="lbl-btn-clear-checked">Limpar Marcados</span>
-                    </button>
+                    <!-- Resumo e Concluir -->
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end bg-slate-50 dark:bg-slate-900/60 px-4 py-2.5 rounded-2xl border border-slate-200/70 dark:border-slate-700">
+                        <div>
+                            <span id="lbl-shop-cart-total" class="text-[11px] uppercase font-bold text-slate-400 block">Total no Carrinho</span>
+                            <span id="shopping-cart-total" class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">¥ 0</span>
+                        </div>
+                        <button onclick="checkoutShoppingList()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-check-double"></i>
+                            <span id="lbl-btn-checkout">Concluir e Lançar Gasto</span>
+                        </button>
+                    </div>
                 </div>
-                <div id="shopping-list-container" class="divide-y divide-slate-100 dark:divide-slate-700/60"></div>
+
+                <!-- Seletor de Modo (Lista Padrão vs. Cômodos da Casa) + Filtro -->
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <div class="inline-flex bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl">
+                        <button onclick="setShoppingViewMode('standard')" id="btn-shop-mode-standard" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm">
+                            <i class="fa-solid fa-list-ul mr-1.5"></i><span id="lbl-mode-standard">Lista Padrão</span>
+                        </button>
+                        <button onclick="setShoppingViewMode('rooms')" id="btn-shop-mode-rooms" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-house-chimney mr-1.5"></i><span id="lbl-mode-rooms">Por Cômodos (Extra)</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleOnlyCheckedFilter()" id="btn-filter-only-checked" class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition">
+                            <i class="fa-regular fa-square-check mr-1"></i><span id="lbl-filter-checked">Mostrar só marcados</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <!-- MODO A: LISTA DE COMPRAS PADRÃO -->
+            <div id="shopping-view-standard" class="space-y-4">
+                <!-- Formulário de Adição Padrão -->
+                <form onsubmit="addStandardShoppingItem(event)" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                    <div class="sm:col-span-5">
+                        <input type="text" id="shop-std-name" required placeholder="Nome do produto (ex: Arroz, Leite...)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <select id="shop-std-room" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium"></select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <input type="number" step="0.01" min="0" id="shop-std-price" placeholder="Preço (opcional)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="w-full h-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-add-item">Adicionar</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Lista Corrida Padrão -->
+                <div id="standard-shopping-list-container" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden"></div>
+            </div>
+
+            <!-- MODO B: RETÂNGULOS POR CÔMODO DA CASA (FUNÇÃO EXTRA INTERLIGADA) -->
+            <div id="shopping-view-rooms" class="hidden space-y-4">
+                
+                <!-- Barra para Criar Novo Cômodo -->
+                <form onsubmit="createNewRoom(event)" class="bg-indigo-50/70 dark:bg-indigo-950/30 p-4 rounded-2xl border border-indigo-200/70 dark:border-indigo-800/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <div class="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">
+                        <i class="fa-solid fa-door-open text-sm"></i>
+                        <span id="lbl-create-room-title">Criar Novo Cômodo:</span>
+                    </div>
+                    <input type="text" id="new-room-icon" maxlength="4" placeholder="🏠" value="🏠" class="w-14 text-center px-2 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    <input type="text" id="new-room-name" required placeholder="Ex: Cozinha, Varanda, Escritório, Garagem..." class="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap">
+                        <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-create-room">Criar Cômodo</span>
+                    </button>
+                </form>
+
+                <!-- Grid de Retângulos dos Cômodos -->
+                <div id="rooms-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            </div>
+
         </section>
 
     </main>
@@ -459,12 +491,10 @@
                     </select>
                 </div>
 
-                <div class="flex items-center gap-2 pt-1">
-                    <input type="checkbox" id="tx-is-recurring" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                    <label for="tx-is-recurring" id="lbl-form-recurring" class="text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
-                        Repetir mensalmente (Despesa / Receita Fixa)
-                    </label>
-                </div>
+                <label class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer pt-1">
+                    <input type="checkbox" id="tx-is-recurring" class="rounded text-indigo-600 focus:ring-indigo-500">
+                    <span id="lbl-form-recurring">Repetir mensalmente (Despesa / Receita Fixa)</span>
+                </label>
 
                 <div>
                     <label id="lbl-form-notes" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Observações / Link de Pagamento</label>
@@ -565,28 +595,21 @@
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div>
                     <h3 id="modal-settings-title" class="font-bold text-slate-900 dark:text-white text-base">Definições e Cópia de Segurança</h3>
-                    <p id="modal-settings-sub" class="text-xs text-slate-500 dark:text-slate-400">Gerencie a segurança dos seus dados locais</p>
+                    <p id="modal-settings-sub" class="text-xs text-slate-500 dark:text-slate-400">Gerencie a segurança dos seus dados locais e na nuvem</p>
                 </div>
                 <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- NOTAS DE ATUALIZAÇÃO (CHANGELOG) -->
+            <!-- NOTAS DE ATUALIZAÇÃO -->
             <div class="space-y-2 bg-indigo-50/60 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-bullhorn"></i> <span id="lbl-changelog-title">Notas de Atualização (v2.2)</span>
+                    <i class="fa-solid fa-bullhorn"></i> <span id="lbl-changelog-title">Notas de Atualização (v3.0)</span>
                 </h4>
-                <ul id="changelog-list" class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-disc pl-4 pt-1"></ul>
-            </div>
-
-            <div class="space-y-2 bg-slate-50 dark:bg-slate-700/40 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-700">
-                <label id="lbl-auto-backup-freq" class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    <i class="fa-solid fa-rotate mr-1 text-indigo-500"></i> Frequência do Backup Automático
-                </label>
-                <select id="auto-backup-frequency" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium">
-                    <option value="instant">Instantâneo (A cada alteração)</option>
-                    <option value="daily">Diário</option>
-                    <option value="weekly">Semanal</option>
-                </select>
+                <ul id="changelog-list" class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-disc pl-4 pt-1">
+                    <li><strong>Compras por Cômodos:</strong> Crie retângulos personalizados para cada ambiente da casa interligados com a lista padrão.</li>
+                    <li><strong>Sincronização Cloud:</strong> Login com Google e atualização em tempo real entre PC e celular.</li>
+                    <li><strong>Gestão Multimoedas:</strong> Suporte para JPY, BRL, USD e EUR com metas independentes.</li>
+                </ul>
             </div>
 
             <div class="space-y-3 pt-2">
@@ -624,7 +647,7 @@
             
             <div class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-sm" id="save-status-indicator">
                 <i class="fa-solid fa-shield-halved text-emerald-500 text-sm"></i>
-                <span id="lbl-save-status">Dados 100% Salvos e Criptografados no seu Navegador</span>
+                <span id="lbl-save-status">Dados Salvos Localmente (Entre com Google para Nuvem)</span>
             </div>
 
             <div class="flex items-center gap-4 font-medium">
@@ -644,9 +667,11 @@
         </div>
     </footer>
 
+    <!-- Firebase SDK (Compat) para Sincronização em Tempo Real -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
     <script src="script.js"></script>
 </body>
 </html>

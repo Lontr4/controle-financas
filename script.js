@@ -1,12 +1,39 @@
-// ==========================================
-// 1. DADOS E CONFIGURAÇÕES INICIAIS
-// ==========================================
+// =========================================================================
+// 1. CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELAS SUAS CHAVES DO FIREBASE CONSOLE)
+// =========================================================================
+const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+};
+
+let auth = null;
+let db = null;
+let currentUser = null;
+let unsubscribeFirestore = null;
+
+try {
+    if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "SUA_API_KEY") {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+    }
+} catch (err) {
+    console.warn("Firebase ainda não configurado com chaves reais:", err);
+}
+
+// =========================================================================
+// 2. DICIONÁRIO MULTILÍNGUE (PT-BR, EN, JA, ES)
+// =========================================================================
 const i18n = {
     'pt-BR': {
         appTitle: "Controle de Finanças",
-        navDash: "Painel / Dashboard",
+        navDash: "Painel",
         navTx: "Transações",
-        navShop: "Lista de Compras",
+        navShop: "Compras",
         btnNewTx: "Nova Transação",
         summaryTitle: "Resumo Financeiro",
         summarySub: "Selecione o mês para filtrar as métricas e o gráfico",
@@ -39,12 +66,10 @@ const i18n = {
         formNotes: "Observações / Link de Pagamento",
         formCurrency: "Moeda da Transação",
         formRecurring: "Repetir mensalmente (Despesa / Receita Fixa)",
-        walletTitle: "Carteira de Moedas",
-        btnAddCurrency: "Adicionar Moeda",
-        statusPaid: "Pago / Concluído",
+        walletTitle: "Carteira:",
+        btnAddCurrency: "Moeda",
+        statusPaid: "Pago",
         statusPending: "Pendente",
-        optStatusPaid: "✅ Pago / Concluído",
-        optStatusPending: "⏳ Pendente",
         btnCancel: "Cancelar",
         btnSave: "Salvar",
         modalTitle: "Adicionar Transação",
@@ -83,50 +108,37 @@ const i18n = {
         btnExportJson: "Exportar JSON",
         btnImportJson: "Importar JSON",
         settingsTitle: "Definições e Cópia de Segurança",
-        settingsSub: "Gerencie a segurança dos seus dados locais",
-        autoBackupFreq: "Frequência do Backup Automático",
-        backupInstant: "Instantâneo (A cada alteração)",
-        backupDaily: "Diário",
-        backupWeekly: "Semanal",
+        settingsSub: "Gerencie a segurança dos seus dados locais e na nuvem",
         manualBackupTitle: "Exportar & Importar Manual",
         btnResetData: "Restaurar Dados Iniciais",
         footerSettings: "Definições de Dados",
         footerPrivacy: "Política de Privacidade Local",
-        saveStatus: "Dados 100% Salvos e Criptografados no seu Navegador",
+        saveStatusLocal: "Dados Salvos Localmente (Entre com Google para Nuvem)",
+        saveStatusCloud: "Sincronizado em Tempo Real na Nuvem",
         allCategories: "Todas as Categorias",
         allMethods: "Todos os Métodos",
         typeExpense: "Despesa",
         typeIncome: "Receita",
-        annualChartTitle: "Comparativo Anual de Gastos (Jan - Dez)",
+        annualChartTitle: "Comparativo Anual de Gastos",
         annualChartSub: "Evolução mensal de despesas e receitas ao longo do ano",
         filterYear: "Ano:",
         allYears: "Todos os Anos",
         chartExpensesLabel: "Despesas",
         chartIncomeLabel: "Receitas",
-        shopTitle: "Lista de Compras de Casa",
-        shopSub: "Organize o que falta e lance o total direto nas suas despesas",
+        shopTitle: "Lista de Compras & Cômodos",
+        shopSub: "Gerencie na lista padrão ou organize por cômodos da casa — ambos sincronizam o mesmo carrinho",
         shopCartTotal: "Total no Carrinho",
-        btnFinishShop: "Concluir e Lançar Gasto",
-        shopItemName: "Item / Produto",
-        shopItemQty: "Qtd.",
-        shopItemPrice: "Preço Total Item (Opcional)",
-        btnAddShop: "Adicionar",
-        shopPendingCount: "Itens na Lista",
-        btnClearChecked: "Limpar Marcados",
-        changelogTitle: "Notas de Atualização (v2.3)",
-        shopItemCat: "Categoria",
-        shopCategories: {
-            breakfast: "☕ Café da Manhã",
-            kitchen: "🍳 Cozinha / Despensa",
-            cleaning: "🧼 Limpeza",
-            hygiene: "🧴 Higiene / Outros"
-        },
-        changelogItems: [
-            "Sincronização em nuvem em tempo real via Conta Google.",
-            "Nova aba Lista de Compras integrada com lançamento direto em despesas.",
-            "Filtro 'Todos os Anos' adicionado ao gráfico comparativo anual.",
-            "Transações recorrentes e filtro de busca por intervalo de datas."
-        ],
+        btnCheckout: "Concluir e Lançar Gasto",
+        modeStandard: "Lista Padrão",
+        modeRooms: "Por Cômodos (Extra)",
+        filterChecked: "Mostrar só marcados",
+        filterAllItems: "Mostrar todos os itens",
+        btnAddItem: "Adicionar",
+        createRoomTitle: "Criar Novo Cômodo:",
+        btnCreateRoom: "Criar Cômodo",
+        emptyShopList: "Nenhum produto cadastrado ainda.",
+        emptyRoomItems: "Nenhum produto neste cômodo.",
+        quickAddPlaceholder: "+ Produto neste cômodo...",
         categories: { 1: "Aluguel", 2: "Gás", 3: "Energia", 4: "Internet Celular", 5: "Internet Casa", 6: "Água", 7: "Saúde", 8: "Alimentação", 9: "Academia", 10: "Escola", 11: "Entrada / Salário", 12: "Hobby / Lazer", 13: "Outros" },
         methods: { 1: "Cartão de Crédito", 2: "Dinheiro", 3: "Transferência Bancária" }
     },
@@ -134,7 +146,7 @@ const i18n = {
         appTitle: "Financial Control",
         navDash: "Dashboard",
         navTx: "Transactions",
-        navShop: "Shopping List",
+        navShop: "Shopping",
         btnNewTx: "New Transaction",
         summaryTitle: "Financial Summary",
         summarySub: "Select a month to filter metrics and chart",
@@ -167,12 +179,10 @@ const i18n = {
         formNotes: "Notes / Link",
         formCurrency: "Transaction Currency",
         formRecurring: "Repeat monthly (Fixed Expense/Income)",
-        walletTitle: "Currency Wallet",
-        btnAddCurrency: "Add Currency",
+        walletTitle: "Wallet:",
+        btnAddCurrency: "Currency",
         statusPaid: "Paid",
         statusPending: "Pending",
-        optStatusPaid: "✅ Paid / Completed",
-        optStatusPending: "⏳ Pending",
         btnCancel: "Cancel",
         btnSave: "Save",
         modalTitle: "Add Transaction",
@@ -211,50 +221,37 @@ const i18n = {
         btnExportJson: "Export JSON",
         btnImportJson: "Import JSON",
         settingsTitle: "Settings & Backup",
-        settingsSub: "Manage your local data security",
-        autoBackupFreq: "Automatic Backup Frequency",
-        backupInstant: "Instant (On every change)",
-        backupDaily: "Daily",
-        backupWeekly: "Weekly",
+        settingsSub: "Manage your local and cloud data security",
         manualBackupTitle: "Manual Export & Import",
         btnResetData: "Reset Initial Data",
         footerSettings: "Data Settings",
         footerPrivacy: "Local Privacy Policy",
-        saveStatus: "100% Data Saved and Encrypted in your Browser",
+        saveStatusLocal: "Saved Locally (Sign in with Google for Cloud)",
+        saveStatusCloud: "Synced in Real-Time to Cloud",
         allCategories: "All Categories",
         allMethods: "All Payment Methods",
         typeExpense: "Expense",
         typeIncome: "Income",
-        annualChartTitle: "Annual Expense Comparison (Jan - Dec)",
+        annualChartTitle: "Annual Expense Comparison",
         annualChartSub: "Monthly evolution of expenses and income throughout the year",
         filterYear: "Year:",
         allYears: "All Years",
         chartExpensesLabel: "Expenses",
         chartIncomeLabel: "Income",
-        shopTitle: "Home Shopping List",
-        shopSub: "Organize what you need and log the total directly into expenses",
+        shopTitle: "Shopping List & House Rooms",
+        shopSub: "Manage in the standard list or by house rooms — both sync the exact same cart",
         shopCartTotal: "Cart Total",
-        btnFinishShop: "Finish & Log Expense",
-        shopItemName: "Item / Product",
-        shopItemQty: "Qty.",
-        shopItemPrice: "Total Item Price (Optional)",
-        btnAddShop: "Add",
-        shopPendingCount: "Items in List",
-        btnClearChecked: "Clear Checked",
-        changelogTitle: "Update Notes (v2.3)",
-        shopItemCat: "Category",
-        shopCategories: {
-            breakfast: "☕ Breakfast",
-            kitchen: "🍳 Kitchen / Pantry",
-            cleaning: "🧼 Cleaning",
-            hygiene: "🧴 Hygiene / Others"
-        },
-        changelogItems: [
-            "Real-time cloud sync via Google Account.",
-            "New Shopping List tab with one-click expense logging.",
-            "'All Years' filter added to the annual comparison chart.",
-            "Monthly recurring transactions and date range filters."
-        ],
+        btnCheckout: "Finish & Log Expense",
+        modeStandard: "Standard List",
+        modeRooms: "By Rooms (Extra)",
+        filterChecked: "Show checked only",
+        filterAllItems: "Show all items",
+        btnAddItem: "Add",
+        createRoomTitle: "Create New Room:",
+        btnCreateRoom: "Create Room",
+        emptyShopList: "No products added yet.",
+        emptyRoomItems: "No products in this room.",
+        quickAddPlaceholder: "+ Add item to room...",
         categories: { 1: "Rent", 2: "Gas", 3: "Electricity", 4: "Mobile Internet", 5: "Home Internet", 6: "Water", 7: "Healthcare", 8: "Food / Groceries", 9: "Gym", 10: "School / Education", 11: "Income / Salary", 12: "Hobby / Leisure", 13: "Others" },
         methods: { 1: "Credit Card", 2: "Cash", 3: "Bank Transfer" }
     },
@@ -295,12 +292,10 @@ const i18n = {
         formNotes: "メモ / リンク",
         formCurrency: "取引通貨",
         formRecurring: "毎月繰り返し設定（固定費・固定収入）",
-        walletTitle: "通貨ウォレット",
-        btnAddCurrency: "通貨を追加",
+        walletTitle: "通貨:",
+        btnAddCurrency: "通貨追加",
         statusPaid: "支払済",
         statusPending: "保留中",
-        optStatusPaid: "✅ 支払済 / 完了",
-        optStatusPending: "⏳ 保留中",
         btnCancel: "キャンセル",
         btnSave: "保存する",
         modalTitle: "取引の登録",
@@ -339,58 +334,45 @@ const i18n = {
         btnExportJson: "JSON出力",
         btnImportJson: "JSON取込",
         settingsTitle: "設定とバックアップ",
-        settingsSub: "ローカルデータのセキュリティ管理",
-        autoBackupFreq: "自動バックアップ頻度",
-        backupInstant: "即時（変更のたびに保存）",
-        backupDaily: "毎日",
-        backupWeekly: "毎週",
+        settingsSub: "ローカルとクラウドのデータ管理",
         manualBackupTitle: "手動エクスポート・インポート",
         btnResetData: "初期データに戻す",
         footerSettings: "データ設定",
         footerPrivacy: "ローカルプライバシーポリシー",
-        saveStatus: "データは100%ブラウザ内に暗号化して保存されています",
+        saveStatusLocal: "ローカル保存済（Googleログインでクラウド同期）",
+        saveStatusCloud: "クラウドにリアルタイム同期中",
         allCategories: "すべてのカテゴリ",
         allMethods: "すべての決済方法",
         typeExpense: "支出",
         typeIncome: "収入",
-        annualChartTitle: "年間支出比較（1月〜12月）",
+        annualChartTitle: "年間支出比較（月別推移）",
         annualChartSub: "1年間の月別支出と収入の推移",
         filterYear: "対象年:",
         allYears: "すべての年",
         chartExpensesLabel: "支出",
         chartIncomeLabel: "収入",
-        shopTitle: "日用品・買い物リスト",
-        shopSub: "必要なものを管理し、合計金額をそのまま支出に記録します",
-        shopCartTotal: "カート合計",
-        btnFinishShop: "買い物を完了して支出登録",
-        shopItemName: "商品名",
-        shopItemQty: "数量",
-        shopItemPrice: "合計金額（任意）",
-        btnAddShop: "追加",
-        shopPendingCount: "リスト内の商品",
-        btnClearChecked: "チェック済みを削除",
-        changelogTitle: "更新履歴 (v2.3)",
-        shopItemCat: "カテゴリ",
-        shopCategories: {
-            breakfast: "☕ 朝食",
-            kitchen: "🍳 キッチン・常備品",
-            cleaning: "🧼 掃除・洗剤",
-            hygiene: "🧴 日用品・その他"
-        },
-        changelogItems: [
-            "Googleアカウントによるリアルタイムクラウド同期機能。",
-            "支出に直接登録できる「買い物リスト」タブを新設。",
-            "年間比較グラフに「すべての年」フィルターを追加。",
-            "固定費の自動繰り返しと日付範囲フィルター機能。"
-        ],
+        shopTitle: "買い物リスト＆部屋別管理",
+        shopSub: "標準リストまたは家の部屋別カードで管理でき、カート内容は自動で連動します",
+        shopCartTotal: "カート合計金額",
+        btnCheckout: "完了して支出に登録",
+        modeStandard: "標準リスト",
+        modeRooms: "部屋別表示 (拡張)",
+        filterChecked: "チェック済のみ表示",
+        filterAllItems: "すべて表示",
+        btnAddItem: "追加",
+        createRoomTitle: "新しい部屋を作成:",
+        btnCreateRoom: "部屋を追加",
+        emptyShopList: "商品がまだ登録されていません。",
+        emptyRoomItems: "この部屋には商品がまだありません。",
+        quickAddPlaceholder: "+ この部屋に商品を追加...",
         categories: { 1: "家賃", 2: "ガス代", 3: "電気代", 4: "携帯通信費", 5: "固定回線", 6: "水道代", 7: "医療・健康", 8: "食費", 9: "ジム・フィットネス", 10: "教育・学費", 11: "給与・収入", 12: "趣味・娯楽", 13: "その他" },
         methods: { 1: "クレジットカード", 2: "現金", 3: "銀行振込" }
     },
     es: {
         appTitle: "Control Financiero",
-        navDash: "Panel / Dashboard",
+        navDash: "Panel",
         navTx: "Transacciones",
-        navShop: "Lista de Compras",
+        navShop: "Compras",
         btnNewTx: "Nueva Transacción",
         summaryTitle: "Resumen Financiero",
         summarySub: "Seleccione un mes para filtrar las métricas y el gráfico",
@@ -423,12 +405,10 @@ const i18n = {
         formNotes: "Observaciones / Enlace",
         formCurrency: "Moneda de la Transacción",
         formRecurring: "Repetir mensualmente (Gasto/Ingreso Fijo)",
-        walletTitle: "Cartera de Monedas",
-        btnAddCurrency: "Agregar Moneda",
+        walletTitle: "Cartera:",
+        btnAddCurrency: "Moneda",
         statusPaid: "Pagado",
         statusPending: "Pendiente",
-        optStatusPaid: "✅ Pagado / Completado",
-        optStatusPending: "⏳ Pendiente",
         btnCancel: "Cancelar",
         btnSave: "Guardar",
         modalTitle: "Agregar Transacción",
@@ -467,50 +447,37 @@ const i18n = {
         btnExportJson: "Exportar JSON",
         btnImportJson: "Importar JSON",
         settingsTitle: "Ajustes y Copias de Seguridad",
-        settingsSub: "Gestiona la seguridad de tus datos locales",
-        autoBackupFreq: "Frecuencia de Copia Automática",
-        backupInstant: "Instantáneo (En cada cambio)",
-        backupDaily: "Diario",
-        backupWeekly: "Semanal",
+        settingsSub: "Gestiona la seguridad de tus datos locales y en la nube",
         manualBackupTitle: "Exportar e Importar Manual",
         btnResetData: "Restaurar Datos Iniciales",
         footerSettings: "Configuración de Datos",
         footerPrivacy: "Política de Privacidad Local",
-        saveStatus: "Datos 100% Guardados y Encriptados en su Navegador",
+        saveStatusLocal: "Guardado Localmente (Inicia con Google para Nube)",
+        saveStatusCloud: "Sincronizado en Tiempo Real en la Nube",
         allCategories: "Todas las Categorías",
         allMethods: "Todos los Métodos",
         typeExpense: "Gasto",
         typeIncome: "Ingreso",
-        annualChartTitle: "Comparativa Anual de Gastos (Ene - Dic)",
+        annualChartTitle: "Comparativa Anual de Gastos",
         annualChartSub: "Evolución mensual de gastos e ingresos durante el año",
         filterYear: "Año:",
         allYears: "Todos los Años",
         chartExpensesLabel: "Gastos",
         chartIncomeLabel: "Ingresos",
-        shopTitle: "Lista de Compras del Hogar",
-        shopSub: "Organiza lo que falta y registra el total directamente en tus gastos",
+        shopTitle: "Lista de Compras y Habitaciones",
+        shopSub: "Gestiona en la lista estándar o por habitaciones — ambos sincronizan el mismo carrito",
         shopCartTotal: "Total en Carrito",
-        btnFinishShop: "Finalizar y Registrar Gasto",
-        shopItemName: "Artículo / Producto",
-        shopItemQty: "Cant.",
-        shopItemPrice: "Precio Total (Opcional)",
-        btnAddShop: "Agregar",
-        shopPendingCount: "Artículos en Lista",
-        btnClearChecked: "Limpiar Marcados",
-        changelogTitle: "Notas de Actualización (v2.3)",
-        shopItemCat: "Categoría",
-        shopCategories: {
-            breakfast: "☕ Desayuno",
-            kitchen: "🍳 Cocina / Despensa",
-            cleaning: "🧼 Limpieza",
-            hygiene: "🧴 Higiene / Otros"
-        },
-        changelogItems: [
-            "Sincronización en la nube en tiempo real con Cuenta Google.",
-            "Nueva pestaña Lista de Compras con registro directo de gastos.",
-            "Filtro 'Todos los Años' añadido al gráfico comparativo anual.",
-            "Transacciones recurrentes mensuales y filtros por rango de fechas."
-        ],
+        btnCheckout: "Finalizar y Registrar Gasto",
+        modeStandard: "Lista Estándar",
+        modeRooms: "Por Habitaciones (Extra)",
+        filterChecked: "Mostrar solo marcados",
+        filterAllItems: "Mostrar todos los ítems",
+        btnAddItem: "Agregar",
+        createRoomTitle: "Crear Nueva Habitación:",
+        btnCreateRoom: "Crear Habitación",
+        emptyShopList: "Aún no hay productos registrados.",
+        emptyRoomItems: "No hay productos en esta habitación.",
+        quickAddPlaceholder: "+ Producto en habitación...",
         categories: { 1: "Alquiler", 2: "Gas", 3: "Electricidad", 4: "Internet Móvil", 5: "Internet Hogar", 6: "Agua", 7: "Salud", 8: "Alimentación", 9: "Gimnasio", 10: "Escuela / Educación", 11: "Ingreso / Salario", 12: "Hobby / Ocio", 13: "Otros" },
         methods: { 1: "Tarjeta de Crédito", 2: "Efectivo", 3: "Transferencia Bancaria" }
     }
@@ -531,8 +498,8 @@ const langDetails = {
 };
 
 let currentLang = localStorage.getItem('finc_lang') || 'pt-BR';
-let currentCurrency = localStorage.getItem('finc_active_currency') || 'BRL';
-let activeCurrencies = JSON.parse(localStorage.getItem('finc_active_currencies')) || ['BRL'];
+let currentCurrency = localStorage.getItem('finc_active_currency') || 'JPY';
+let activeCurrencies = JSON.parse(localStorage.getItem('finc_active_currencies')) || ['JPY', 'BRL'];
 
 const initialCategories = [
     { id: 1, name: 'Aluguel', type: 'Despesa' },
@@ -557,191 +524,148 @@ const initialMethods = [
 ];
 
 const initialTransactions = [
-    { id: 1, description: 'Salário Exemplo', amount: 3500.00, currency: 'BRL', date: '2026-10-01', categoryId: 11, paymentMethodId: 3, status: 'paid', isRecurring: true, notes: 'Receita fixa mensal' },
-    { id: 2, description: 'Supermercado Modelo', amount: 450.50, currency: 'BRL', date: '2026-10-05', categoryId: 8, paymentMethodId: 1, status: 'paid', isRecurring: false, notes: 'Compras para a casa' },
-    { id: 3, description: 'Conta de Luz Exemplo', amount: 180.20, currency: 'BRL', date: '2026-10-10', categoryId: 3, paymentMethodId: 3, status: 'pending', isRecurring: true, notes: 'Vencimento dia 10' }
+    { id: 1, description: 'Salário Exemplo', amount: 280000, currency: 'JPY', date: '2026-11-01', categoryId: 11, paymentMethodId: 3, status: 'paid', isRecurring: true, notes: 'Receita fixa mensal' },
+    { id: 2, description: 'Supermercado Modelo', amount: 12500, currency: 'JPY', date: '2026-11-05', categoryId: 8, paymentMethodId: 1, status: 'paid', isRecurring: false, notes: 'Compras da semana' }
 ];
 
-if (!localStorage.getItem('finc_transactions')) {
-    localStorage.setItem('finc_categories', JSON.stringify(initialCategories));
-    localStorage.setItem('finc_methods', JSON.stringify(initialMethods));
-    localStorage.setItem('finc_transactions', JSON.stringify(initialTransactions));
-    localStorage.setItem('finc_active_currencies', JSON.stringify(activeCurrencies));
-}
+// =========================================================================
+// 3. DADOS DE CÔMODOS & LISTA DE COMPRAS INTERLIGADOS
+// =========================================================================
+const initialRooms = [
+    { id: 'room_kitchen', name: 'Cozinha', icon: '🍳' },
+    { id: 'room_laundry', name: 'Lavanderia', icon: '🧼' },
+    { id: 'room_bathroom', name: 'Banheiro', icon: '🚿' },
+    { id: 'room_living', name: 'Sala / Geral', icon: '🛋️' }
+];
+
+const initialShoppingItems = [
+    { id: 101, name: 'Arroz 5kg', roomId: 'room_kitchen', price: 0, checked: false },
+    { id: 102, name: 'Ovos (10 un)', roomId: 'room_kitchen', price: 0, checked: false },
+    { id: 103, name: 'Detergente', roomId: 'room_laundry', price: 0, checked: false },
+    { id: 104, name: 'Papel Higiênico', roomId: 'room_bathroom', price: 0, checked: false }
+];
 
 let categories = JSON.parse(localStorage.getItem('finc_categories')) || initialCategories;
 let methods = JSON.parse(localStorage.getItem('finc_methods')) || initialMethods;
-let transactions = JSON.parse(localStorage.getItem('finc_transactions')) || [];
+let transactions = JSON.parse(localStorage.getItem('finc_transactions')) || initialTransactions;
+let houseRooms = JSON.parse(localStorage.getItem('finc_house_rooms')) || initialRooms;
+let shoppingItems = JSON.parse(localStorage.getItem('finc_shopping_items')) || initialShoppingItems;
 
-transactions = transactions.map(tx => ({
-    ...tx,
-    currency: tx.currency || 'BRL',
-    isRecurring: tx.isRecurring || false
-}));
-
-let shoppingList = JSON.parse(localStorage.getItem('finc_shopping_list')) || [
-    { id: 1, name: 'Arroz (5kg)', qty: '1 pct', price: 0, checked: false, currency: currentCurrency },
-    { id: 2, name: 'Leite Integral', qty: '2 cx', price: 0, checked: false, currency: currentCurrency }
-];
+let shoppingViewMode = localStorage.getItem('finc_shop_view_mode') || 'standard';
+let shopOnlyChecked = false;
 
 let myChart = null;
 let annualChart = null;
 
-// ==========================================
-// 2. CONFIGURAÇÃO DO FIREBASE & CLOUD SYNC
-// ==========================================
-const firebaseConfig = {
-    apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
-    authDomain: "controle-financas-9c015.firebaseapp.com",
-    projectId: "controle-financas-9c015",
-    storageBucket: "controle-financas-9c015.firebasestorage.app",
-    messagingSenderId: "317294408562",
-    appId: "1:317294408562:web:b6d16b5774512c06dee3eb",
-    measurementId: "G-V0L9V3ZHBW"
-};
-
-let auth = null;
-let db = null;
-let currentUser = null;
-let isSyncingFromCloud = false;
-
-if (typeof firebase !== 'undefined') {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    db = firebase.firestore();
-}
-
-function handleGoogleAuth() {
-    if (!auth) {
-        alert("O módulo de autenticação ainda está carregando. Tente novamente em alguns segundos.");
-        return;
-    }
-    if (currentUser) {
-        if (confirm(`Conectado como ${currentUser.email}.\nDeseja sair da conta?`)) {
-            auth.signOut();
-        }
-    } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(err => {
-            console.error("Erro no login Google:", err);
-            alert("Não foi possível conectar com o Google: " + err.message);
-        });
-    }
-}
-
-function updateAuthUI(user) {
-    const avatar = document.getElementById('google-user-avatar');
-    const label = document.getElementById('lbl-google-auth');
-    if (!avatar || !label) return;
-
-    if (user) {
-        avatar.src = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-        label.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Conectado';
-    } else {
-        avatar.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
-        label.innerText = 'Entrar';
-    }
-}
-
-const originalSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-    originalSetItem(key, value);
-    if (currentUser && !isSyncingFromCloud && key.startsWith('finc_')) {
-        syncLocalToCloud();
-    }
-};
-
-function syncLocalToCloud() {
-    if (!currentUser || !db) return;
-    const payload = {
-        transactions: JSON.parse(localStorage.getItem('finc_transactions') || '[]'),
-        categories: JSON.parse(localStorage.getItem('finc_categories') || '[]'),
-        methods: JSON.parse(localStorage.getItem('finc_methods') || '[]'),
-        shoppingList: JSON.parse(localStorage.getItem('finc_shopping_list') || '[]'),
-        targetsList: JSON.parse(localStorage.getItem('finc_targets_list') || '[]'),
-        activeCurrencies: JSON.parse(localStorage.getItem('finc_active_currencies') || '["JPY","BRL","USD","EUR"]'),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    db.collection('users').doc(currentUser.uid).set(payload, { merge: true })
-        .catch(err => console.error("Erro ao salvar na nuvem:", err));
-}
-
+// =========================================================================
+// 4. SINCRONIZAÇÃO EM TEMPO REAL COM FIREBASE
+// =========================================================================
 if (auth) {
-    auth.onAuthStateChanged(async (user) => {
+    auth.onAuthStateChanged((user) => {
         currentUser = user;
-        updateAuthUI(user);
-
+        updateAuthUI();
         if (user && db) {
-            const docRef = db.collection('users').doc(user.uid);
-            const snap = await docRef.get();
-
-            if (!snap.exists && (transactions.length > 0 || shoppingList.length > 0 || getTargets().length > 0)) {
-                syncLocalToCloud();
-            }
-
-            docRef.onSnapshot((doc) => {
-                if (!doc.exists || doc.metadata.hasPendingWrites) return;
-                const data = doc.data();
-                isSyncingFromCloud = true;
-
-                if (data.transactions) {
-                    transactions = data.transactions;
-                    originalSetItem('finc_transactions', JSON.stringify(transactions));
-                }
-                if (data.categories && data.categories.length) {
-                    categories = data.categories;
-                    originalSetItem('finc_categories', JSON.stringify(categories));
-                }
-                if (data.methods && data.methods.length) {
-                    methods = data.methods;
-                    originalSetItem('finc_methods', JSON.stringify(methods));
-                }
-                if (data.shoppingList) {
-                    shoppingList = data.shoppingList;
-                    originalSetItem('finc_shopping_list', JSON.stringify(shoppingList));
-                }
-                if (data.targetsList) {
-                    originalSetItem('finc_targets_list', JSON.stringify(data.targetsList));
-                }
-                if (data.activeCurrencies) {
-                    activeCurrencies = data.activeCurrencies;
-                    originalSetItem('finc_active_currencies', JSON.stringify(activeCurrencies));
-                }
-
-                isSyncingFromCloud = false;
-
-                populateMonthFilterOptions();
-                renderWalletCards();
-                renderDashboard();
-                renderTransactionsTable();
-                renderShoppingList();
-            });
+            startFirestoreSync(user.uid);
+        } else if (unsubscribeFirestore) {
+            unsubscribeFirestore();
+            unsubscribeFirestore = null;
         }
     });
 }
 
-// ==========================================
-// 3. FUNÇÕES PRINCIPAIS DO SISTEMA
-// ==========================================
+function handleGoogleAuth() {
+    if (!auth) {
+        alert("Configure suas chaves do Firebase no topo do arquivo script.js para ativar o Login Google.");
+        return;
+    }
+    if (currentUser) {
+        if (confirm(`Conectado como ${currentUser.displayName || currentUser.email}. Deseja sair da conta?`)) {
+            auth.signOut();
+        }
+    } else {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => alert("Erro no login Google: " + err.message));
+    }
+}
+
+function updateAuthUI() {
+    const avatar = document.getElementById('google-user-avatar');
+    const lbl = document.getElementById('lbl-google-auth');
+    if (!avatar || !lbl) return;
+
+    if (currentUser) {
+        avatar.src = currentUser.photoURL || "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
+        lbl.innerText = (currentUser.displayName || "Conta").split(' ')[0];
+    } else {
+        avatar.src = "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
+        lbl.innerText = "Entrar";
+    }
+    updateSaveIndicator();
+}
+
+function startFirestoreSync(uid) {
+    const docRef = db.collection('users').doc(uid);
+    unsubscribeFirestore = docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            if (data.transactions) transactions = data.transactions;
+            if (data.targets) localStorage.setItem('finc_targets_list', JSON.stringify(data.targets));
+            if (data.activeCurrencies) activeCurrencies = data.activeCurrencies;
+            if (data.houseRooms) houseRooms = data.houseRooms;
+            if (data.shoppingItems) shoppingItems = data.shoppingItems;
+
+            saveAllToLocalStorage();
+            populateMonthFilterOptions();
+            renderWalletCards();
+            renderDashboard();
+            renderTransactionsTable();
+            renderShoppingModule();
+            updateSaveIndicator();
+        } else {
+            pushStateToCloud();
+        }
+    });
+}
+
+function pushStateToCloud() {
+    saveAllToLocalStorage();
+    if (currentUser && db) {
+        db.collection('users').doc(currentUser.uid).set({
+            transactions,
+            targets: getTargets(),
+            activeCurrencies,
+            houseRooms,
+            shoppingItems,
+            updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.error("Erro ao sincronizar nuvem:", err));
+    }
+    updateSaveIndicator();
+}
+
+function saveAllToLocalStorage() {
+    localStorage.setItem('finc_transactions', JSON.stringify(transactions));
+    localStorage.setItem('finc_active_currencies', JSON.stringify(activeCurrencies));
+    localStorage.setItem('finc_active_currency', currentCurrency);
+    localStorage.setItem('finc_house_rooms', JSON.stringify(houseRooms));
+    localStorage.setItem('finc_shopping_items', JSON.stringify(shoppingItems));
+}
+
+// =========================================================================
+// 5. INICIALIZAÇÃO & RECORRÊNCIAS
+// =========================================================================
 function processRecurringTransactions() {
     const today = new Date();
     const currentMonthStr = today.toISOString().substring(0, 7);
     let hasNewItems = false;
 
-    const recurringItems = transactions.filter(t => t.isRecurring);
-
-    recurringItems.forEach(item => {
+    transactions.filter(t => t.isRecurring).forEach(item => {
         const itemMonth = item.date.substring(0, 7);
         if (itemMonth < currentMonthStr) {
             const dayPart = item.date.substring(8, 10);
             const expectedNewDate = `${currentMonthStr}-${dayPart}`;
-
-            const alreadyExists = transactions.some(t => 
-                t.description === item.description && 
-                t.amount === item.amount && 
+            const alreadyExists = transactions.some(t =>
+                t.description === item.description &&
+                t.amount === item.amount &&
                 t.currency === item.currency &&
                 t.date.substring(0, 7) === currentMonthStr
             );
@@ -764,9 +688,7 @@ function processRecurringTransactions() {
         }
     });
 
-    if (hasNewItems) {
-        localStorage.setItem('finc_transactions', JSON.stringify(transactions));
-    }
+    if (hasNewItems) pushStateToCloud();
 }
 
 function getCategoryName(cat) {
@@ -811,7 +733,7 @@ window.addEventListener('DOMContentLoaded', () => {
     renderWalletCards();
     renderDashboard();
     renderTransactionsTable();
-    renderShoppingList();
+    setShoppingViewMode(shoppingViewMode);
 });
 
 function formatCurrency(val, code = currentCurrency) {
@@ -824,6 +746,351 @@ function formatCurrency(val, code = currentCurrency) {
     }).format(val);
 }
 
+// =========================================================================
+// 6. COMPRAS PADRÃO + CÔMODOS DA CASA (TOTALMENTE INTERLIGADOS)
+// =========================================================================
+function setShoppingViewMode(mode) {
+    shoppingViewMode = mode;
+    localStorage.setItem('finc_shop_view_mode', mode);
+
+    const stdView = document.getElementById('shopping-view-standard');
+    const roomsView = document.getElementById('shopping-view-rooms');
+    const btnStd = document.getElementById('btn-shop-mode-standard');
+    const btnRooms = document.getElementById('btn-shop-mode-rooms');
+
+    if (stdView && roomsView) {
+        stdView.classList.toggle('hidden', mode !== 'standard');
+        roomsView.classList.toggle('hidden', mode !== 'rooms');
+    }
+
+    if (btnStd && btnRooms) {
+        if (mode === 'standard') {
+            btnStd.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm";
+            btnRooms.className = "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-600 dark:text-slate-300";
+        } else {
+            btnRooms.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm";
+            btnStd.className = "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-600 dark:text-slate-300";
+        }
+    }
+
+    renderShoppingModule();
+}
+
+function toggleOnlyCheckedFilter() {
+    shopOnlyChecked = !shopOnlyChecked;
+    const t = i18n[currentLang] || i18n['pt-BR'];
+    const btn = document.getElementById('btn-filter-only-checked');
+    const lbl = document.getElementById('lbl-filter-checked');
+
+    if (lbl) lbl.innerText = shopOnlyChecked ? t.filterAllItems : t.filterChecked;
+    if (btn) {
+        btn.classList.toggle('bg-indigo-600', shopOnlyChecked);
+        btn.classList.toggle('text-white', shopOnlyChecked);
+        btn.classList.toggle('border-indigo-600', shopOnlyChecked);
+    }
+    renderShoppingModule();
+}
+
+function populateRoomSelectors() {
+    const select = document.getElementById('shop-std-room');
+    if (!select) return;
+    select.innerHTML = houseRooms.map(r => `<option value="${r.id}">${r.icon} ${r.name}</option>`).join('');
+}
+
+function createNewRoom(e) {
+    e.preventDefault();
+    const nameInput = document.getElementById('new-room-name');
+    const iconInput = document.getElementById('new-room-icon');
+    const name = nameInput.value.trim();
+    const icon = (iconInput.value.trim() || '🏠');
+
+    if (!name) return;
+
+    houseRooms.push({
+        id: 'room_' + Date.now(),
+        name,
+        icon
+    });
+
+    nameInput.value = '';
+    pushStateToCloud();
+    populateRoomSelectors();
+    renderShoppingModule();
+}
+
+function renameRoom(roomId) {
+    const room = houseRooms.find(r => r.id === roomId);
+    if (!room) return;
+    const newName = prompt("Novo nome para o cômodo:", room.name);
+    if (newName && newName.trim()) {
+        room.name = newName.trim();
+        pushStateToCloud();
+        populateRoomSelectors();
+        renderShoppingModule();
+    }
+}
+
+function deleteRoom(roomId) {
+    if (houseRooms.length <= 1) {
+        alert("Mantenha pelo menos 1 cômodo cadastrado.");
+        return;
+    }
+    if (!confirm("Excluir este cômodo? Os itens dele serão movidos para o primeiro cômodo.")) return;
+
+    const fallbackRoomId = houseRooms.find(r => r.id !== roomId).id;
+    shoppingItems.forEach(item => {
+        if (item.roomId === roomId) item.roomId = fallbackRoomId;
+    });
+    houseRooms = houseRooms.filter(r => r.id !== roomId);
+
+    pushStateToCloud();
+    populateRoomSelectors();
+    renderShoppingModule();
+}
+
+// Adicionar produto pela Lista Padrão
+function addStandardShoppingItem(e) {
+    e.preventDefault();
+    const nameEl = document.getElementById('shop-std-name');
+    const roomEl = document.getElementById('shop-std-room');
+    const priceEl = document.getElementById('shop-std-price');
+
+    const name = nameEl.value.trim();
+    const roomId = roomEl.value || (houseRooms[0] && houseRooms[0].id);
+    const price = parseFloat(priceEl.value) || 0;
+
+    if (!name) return;
+
+    shoppingItems.push({
+        id: Date.now(),
+        name,
+        roomId,
+        price,
+        checked: price > 0
+    });
+
+    nameEl.value = '';
+    priceEl.value = '';
+    pushStateToCloud();
+    renderShoppingModule();
+}
+
+// Adicionar produto diretamente dentro de um Retângulo de Cômodo
+function addItemToRoom(e, roomId) {
+    e.preventDefault();
+    const input = document.getElementById(`quick-input-${roomId}`);
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) return;
+
+    shoppingItems.push({
+        id: Date.now(),
+        name,
+        roomId,
+        price: 0,
+        checked: false
+    });
+
+    input.value = '';
+    pushStateToCloud();
+    renderShoppingModule();
+}
+
+function toggleShoppingItem(id) {
+    const item = shoppingItems.find(i => i.id === id);
+    if (!item) return;
+    item.checked = !item.checked;
+    pushStateToCloud();
+    renderShoppingModule();
+}
+
+function updateShoppingItemPrice(id, val) {
+    const item = shoppingItems.find(i => i.id === id);
+    if (!item) return;
+    item.price = parseFloat(val) || 0;
+    if (item.price > 0) item.checked = true;
+    pushStateToCloud();
+    updateShoppingCartTotal();
+}
+
+function deleteShoppingItem(id) {
+    shoppingItems = shoppingItems.filter(i => i.id !== id);
+    pushStateToCloud();
+    renderShoppingModule();
+}
+
+function updateShoppingCartTotal() {
+    const totalEl = document.getElementById('shopping-cart-total');
+    if (!totalEl) return;
+
+    const total = shoppingItems
+        .filter(i => i.checked)
+        .reduce((sum, i) => sum + Number(i.price || 0), 0);
+
+    totalEl.innerText = formatCurrency(total, currentCurrency);
+}
+
+function renderShoppingModule() {
+    populateRoomSelectors();
+    updateShoppingCartTotal();
+    renderStandardShoppingList();
+    renderRoomsGrid();
+}
+
+function renderStandardShoppingList() {
+    const container = document.getElementById('standard-shopping-list-container');
+    if (!container) return;
+
+    const t = i18n[currentLang] || i18n['pt-BR'];
+    const visibleItems = shopOnlyChecked ? shoppingItems.filter(i => i.checked) : shoppingItems;
+
+    if (visibleItems.length === 0) {
+        container.innerHTML = `<p class="p-6 text-center text-xs text-slate-400 italic">${t.emptyShopList}</p>`;
+        return;
+    }
+
+    container.innerHTML = visibleItems.map(item => {
+        const room = houseRooms.find(r => r.id === item.roomId) || { icon: '🏠', name: 'Geral' };
+        return `
+            <div class="flex items-center justify-between gap-3 p-3.5 transition-colors ${item.checked ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}">
+                <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+                    <div class="min-w-0">
+                        <p class="text-xs sm:text-sm font-semibold truncate ${item.checked ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-800 dark:text-slate-100'}">${item.name}</p>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 mt-0.5">
+                            ${room.icon} ${room.name}
+                        </span>
+                    </div>
+                </label>
+
+                <div class="flex items-center gap-2">
+                    <input type="number" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
+                           onchange="updateShoppingItemPrice(${item.id}, this.value)"
+                           class="w-24 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-right font-bold">
+                    <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 p-1">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderRoomsGrid() {
+    const grid = document.getElementById('rooms-grid-container');
+    if (!grid) return;
+
+    const t = i18n[currentLang] || i18n['pt-BR'];
+
+    grid.innerHTML = houseRooms.map(room => {
+        const roomItems = shoppingItems.filter(i => i.roomId === room.id && (!shopOnlyChecked || i.checked));
+        const checkedCount = shoppingItems.filter(i => i.roomId === room.id && i.checked).length;
+
+        const itemsHtml = roomItems.length === 0
+            ? `<p class="text-[11px] text-slate-400 italic py-3 text-center">${t.emptyRoomItems}</p>`
+            : roomItems.map(item => `
+                <div class="flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-xl border ${item.checked ? 'bg-indigo-50/70 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700'}">
+                    <label class="flex items-center gap-2 flex-1 cursor-pointer min-w-0">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="w-3.5 h-3.5 rounded text-indigo-600">
+                        <span class="text-xs font-medium truncate ${item.checked ? 'font-bold text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}">${item.name}</span>
+                    </label>
+                    <div class="flex items-center gap-1.5">
+                        <input type="number" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
+                               onchange="updateShoppingItemPrice(${item.id}, this.value)"
+                               class="w-20 px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-[11px] text-right font-bold">
+                        <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-1">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+        return `
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200/90 dark:border-slate-700 shadow-sm flex flex-col justify-between overflow-hidden">
+                <!-- Cabeçalho do Retângulo do Cômodo -->
+                <div class="px-4 py-3 bg-slate-50 dark:bg-slate-700/40 border-b border-slate-200/70 dark:border-slate-700 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">${room.icon}</span>
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">${room.name}</h3>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+                            ${checkedCount} no carrinho
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="renameRoom('${room.id}')" title="Renomear cômodo" class="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="deleteRoom('${room.id}')" title="Excluir cômodo" class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Produtos dentro do Retângulo -->
+                <div class="p-3.5 space-y-2 flex-1 max-h-64 overflow-y-auto">
+                    ${itemsHtml}
+                </div>
+
+                <!-- Campo Rápido para Adicionar Produto neste Cômodo -->
+                <form onsubmit="addItemToRoom(event, '${room.id}')" class="p-2.5 bg-slate-50/70 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-700 flex gap-1.5">
+                    <input type="text" id="quick-input-${room.id}" placeholder="${t.quickAddPlaceholder}" class="flex-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+                    <button type="submit" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </form>
+            </div>
+        `;
+    }).join('');
+}
+
+function checkoutShoppingList() {
+    const checkedItems = shoppingItems.filter(i => i.checked);
+    if (checkedItems.length === 0) {
+        alert("Marque pelo menos um item no carrinho antes de concluir.");
+        return;
+    }
+
+    const total = checkedItems.reduce((sum, i) => sum + Number(i.price || 0), 0);
+    if (total <= 0) {
+        alert("Informe o valor dos produtos marcados para lançar a despesa.");
+        return;
+    }
+
+    const itemsSummary = checkedItems.map(i => i.name).join(', ');
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    transactions.push({
+        id: Date.now(),
+        description: `Compras (${checkedItems.length} itens)`,
+        amount: total,
+        currency: currentCurrency,
+        date: todayStr,
+        categoryId: 8, // Alimentação
+        paymentMethodId: 1,
+        status: 'paid',
+        isRecurring: false,
+        notes: itemsSummary
+    });
+
+    // Desmarca os itens comprados e zera os preços para a próxima ida ao mercado (mantendo o catálogo dos cômodos!)
+    shoppingItems.forEach(item => {
+        if (item.checked) {
+            item.checked = false;
+            item.price = 0;
+        }
+    });
+
+    pushStateToCloud();
+    populateMonthFilterOptions(todayStr.substring(0, 7));
+    renderDashboard();
+    renderTransactionsTable();
+    renderShoppingModule();
+    alert(`Despesa de ${formatCurrency(total)} lançada com sucesso!`);
+}
+
+// =========================================================================
+// 7. CARTEIRA, DASHBOARD, METAS E TRANSAÇÕES
+// =========================================================================
 function toggleAddCurrencyDropdown() {
     const menu = document.getElementById('add-currency-menu');
     if (menu) menu.classList.toggle('hidden');
@@ -832,12 +1099,10 @@ function toggleAddCurrencyDropdown() {
 function activateCurrency(code) {
     if (!activeCurrencies.includes(code)) {
         activeCurrencies.push(code);
-        localStorage.setItem('finc_active_currencies', JSON.stringify(activeCurrencies));
+        pushStateToCloud();
     }
-
     const menu = document.getElementById('add-currency-menu');
     if (menu) menu.classList.add('hidden');
-
     switchCurrency(code);
 }
 
@@ -852,7 +1117,7 @@ function switchCurrency(code) {
     renderWalletCards();
     renderDashboard();
     renderTransactionsTable();
-    renderShoppingList();
+    updateShoppingCartTotal();
 }
 
 function renderWalletCards() {
@@ -862,10 +1127,8 @@ function renderWalletCards() {
     const usedCurrencies = new Set(activeCurrencies);
     transactions.forEach(t => usedCurrencies.add(t.currency || 'BRL'));
 
-    const displayCurrencies = Array.from(usedCurrencies);
     walletContainer.innerHTML = '';
-
-    displayCurrencies.forEach(code => {
+    Array.from(usedCurrencies).forEach(code => {
         const conf = currencyConfig[code];
         if (!conf) return;
 
@@ -873,29 +1136,23 @@ function renderWalletCards() {
         transactions.filter(t => t.currency === code).forEach(t => {
             const cat = categories.find(c => c.id === Number(t.categoryId));
             const amt = Number(t.amount || 0);
-            if (cat && (cat.type === 'Receita' || cat.tipo === 'Receita')) {
-                balance += amt;
-            } else {
-                balance -= amt;
-            }
+            if (cat && cat.type === 'Receita') balance += amt;
+            else balance -= amt;
         });
 
         const isActive = code === currentCurrency;
-
         walletContainer.innerHTML += `
             <div onclick="switchCurrency('${code}')" 
-                 class="cursor-pointer px-3 py-1.5 rounded-xl border text-xs flex items-center gap-2.5 transition-all shadow-sm hover:shadow-md ${
+                 class="cursor-pointer px-3 py-1.5 rounded-xl border text-xs flex items-center gap-2 transition-all shadow-sm hover:shadow-md ${
                      isActive 
                      ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-900/40 ring-1 ring-indigo-500/30' 
                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50'
                  }">
-                <div class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
+                <div class="flex items-center gap-1 font-bold text-slate-700 dark:text-slate-200">
                     <span>${conf.flag}</span>
                     <span>${conf.code}</span>
                 </div>
-                <span class="font-extrabold text-slate-900 dark:text-white">
-                    ${formatCurrency(balance, code)}
-                </span>
+                <span class="font-extrabold text-slate-900 dark:text-white">${formatCurrency(balance, code)}</span>
                 ${isActive ? '<span class="w-2 h-2 rounded-full bg-indigo-600"></span>' : ''}
             </div>
         `;
@@ -923,22 +1180,8 @@ function selectLanguage(lang) {
     populateMonthFilterOptions();
     renderDashboard();
     renderTransactionsTable();
-    renderShoppingList();
+    renderShoppingModule();
 }
-
-window.addEventListener('click', (e) => {
-    const containerLang = document.getElementById('dropdown-lang-container');
-    const menuLang = document.getElementById('lang-dropdown-menu');
-    if (containerLang && menuLang && !containerLang.contains(e.target)) {
-        menuLang.classList.add('hidden');
-    }
-
-    const containerCurr = document.getElementById('dropdown-add-currency-container');
-    const menuCurr = document.getElementById('add-currency-menu');
-    if (containerCurr && menuCurr && !containerCurr.contains(e.target)) {
-        menuCurr.classList.add('hidden');
-    }
-});
 
 function updateLanguage() {
     const t = i18n[currentLang] || i18n['pt-BR'];
@@ -993,7 +1236,6 @@ function updateLanguage() {
         'lbl-target-date-input': t.targetLimitDate,
         'btn-add-target-text': t.btnSaveTarget,
         'lbl-active-targets-title': t.activeTargets,
-        'lbl-assign-target-opt': t.assignTargetOpt,
         'btn-deposit-confirm': t.btnConfirmDeposit,
         'lbl-deposit-amount-input': t.depositAmountLbl,
         'lbl-btn-export-json': t.btnExportJson,
@@ -1002,23 +1244,18 @@ function updateLanguage() {
         'modal-settings-sub': t.settingsSub,
         'lbl-manual-backup-title': t.manualBackupTitle,
         'lbl-btn-reset-data': t.btnResetData,
-        'lbl-save-status': t.saveStatus,
         'lbl-footer-settings': t.footerSettings,
         'lbl-footer-privacy': t.footerPrivacy,
-        'lbl-changelog-title': t.changelogTitle,
         'lbl-annual-chart-title': t.annualChartTitle,
         'lbl-annual-chart-sub': t.annualChartSub,
         'lbl-filter-year': t.filterYear,
-        'lbl-shop-title': t.shopTitle,
-        'lbl-shop-sub': t.shopSub,
         'lbl-shop-cart-total': t.shopCartTotal,
-        'lbl-btn-finish-shop': t.btnFinishShop,
-        'lbl-shop-item-name': t.shopItemName,
-        'lbl-shop-item-qty': t.shopItemQty,
-        'lbl-shop-item-price': t.shopItemPrice,
-        'lbl-btn-add-shop': t.btnAddShop,
-        'lbl-shop-pending-count': t.shopPendingCount,
-        'lbl-btn-clear-checked': t.btnClearChecked
+        'lbl-btn-checkout': t.btnCheckout,
+        'lbl-mode-standard': t.modeStandard,
+        'lbl-mode-rooms': t.modeRooms,
+        'lbl-btn-add-item': t.btnAddItem,
+        'lbl-create-room-title': t.createRoomTitle,
+        'lbl-btn-create-room': t.btnCreateRoom
     };
 
     Object.keys(elementsMap).forEach(id => {
@@ -1026,43 +1263,12 @@ function updateLanguage() {
         if (el) el.innerText = elementsMap[id];
     });
 
-    const autoBackupLbl = document.getElementById('lbl-auto-backup-freq');
-    if (autoBackupLbl) {
-        autoBackupLbl.innerHTML = `<i class="fa-solid fa-rotate mr-1 text-indigo-500"></i> ${t.autoBackupFreq}`;
-    }
-
-    const backupSelect = document.getElementById('auto-backup-frequency');
-    if (backupSelect) {
-        const currentVal = backupSelect.value || 'instant';
-        backupSelect.innerHTML = `
-            <option value="instant">${t.backupInstant}</option>
-            <option value="daily">${t.backupDaily}</option>
-            <option value="weekly">${t.backupWeekly}</option>
-        `;
-        backupSelect.value = currentVal;
-    }
-
-    const statusSelect = document.getElementById('tx-status');
-    if (statusSelect) {
-        const currentStatus = statusSelect.value || 'paid';
-        statusSelect.innerHTML = `
-            <option value="paid">${t.optStatusPaid}</option>
-            <option value="pending">${t.optStatusPending}</option>
-        `;
-        statusSelect.value = currentStatus;
-    }
-
-    const changelogList = document.getElementById('changelog-list');
-    if (changelogList && t.changelogItems) {
-        changelogList.innerHTML = t.changelogItems.map(item => `<li>${item}</li>`).join('');
-    }
-
     document.querySelectorAll('.lbl-btn-new-tx-sub').forEach(el => el.innerText = t.btnNewTx);
-
     updateCategoryDropdowns();
     updateMethodDropdowns();
     renderModalTargetsList();
     updateTargetAssignDropdown();
+    updateSaveIndicator();
 }
 
 function populateMonthFilterOptions(selectedMonthValue = null) {
@@ -1074,9 +1280,7 @@ function populateMonthFilterOptions(selectedMonthValue = null) {
 
     const monthsSet = new Set();
     transactions.filter(tx => tx.currency === currentCurrency).forEach(tx => {
-        if (tx.date && tx.date.length >= 7) {
-            monthsSet.add(tx.date.substring(0, 7));
-        }
+        if (tx.date && tx.date.length >= 7) monthsSet.add(tx.date.substring(0, 7));
     });
 
     const sortedMonths = Array.from(monthsSet).sort().reverse();
@@ -1084,19 +1288,13 @@ function populateMonthFilterOptions(selectedMonthValue = null) {
 
     sortedMonths.forEach(m => {
         const [year, month] = m.split('-');
-        const langLocale = currentLang === 'ja' ? 'ja-JP' : 
-                           currentLang === 'es' ? 'es-ES' : 
-                           currentLang === 'en' ? 'en-US' : 'pt-BR';
+        const langLocale = currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : currentLang === 'en' ? 'en-US' : 'pt-BR';
         const monthName = new Date(year, month - 1).toLocaleString(langLocale, { month: 'long' });
         const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
         filterSelect.innerHTML += `<option value="${m}">${capitalized} / ${year}</option>`;
     });
 
-    if (Array.from(filterSelect.options).some(opt => opt.value === currentSelected)) {
-        filterSelect.value = currentSelected;
-    } else {
-        filterSelect.value = 'ALL';
-    }
+    filterSelect.value = Array.from(filterSelect.options).some(opt => opt.value === currentSelected) ? currentSelected : 'ALL';
 }
 
 function renderDashboard() {
@@ -1108,11 +1306,7 @@ function renderDashboard() {
     const t = i18n[currentLang] || i18n['pt-BR'];
 
     if (periodBadge) {
-        if (selectedMonth === 'ALL') {
-            periodBadge.innerText = t.overview;
-        } else if (filterSelect.options[filterSelect.selectedIndex]) {
-            periodBadge.innerText = filterSelect.options[filterSelect.selectedIndex].text;
-        }
+        periodBadge.innerText = selectedMonth === 'ALL' ? t.overview : (filterSelect.options[filterSelect.selectedIndex]?.text || t.overview);
     }
 
     let totalIncome = 0;
@@ -1120,22 +1314,18 @@ function renderDashboard() {
     const expenseByCatMap = {};
 
     const filteredTx = transactions.filter(tx => {
-        const isCurrentCurr = (tx.currency || 'BRL') === currentCurrency;
-        if (!isCurrentCurr) return false;
+        if ((tx.currency || 'BRL') !== currentCurrency) return false;
         if (selectedMonth === 'ALL') return true;
         return tx.date && tx.date.startsWith(selectedMonth);
     });
 
     filteredTx.forEach(tx => {
-        const catId = tx.categoryId;
-        const cat = categories.find(c => c.id === Number(catId));
+        const cat = categories.find(c => c.id === Number(tx.categoryId));
         const amount = Number(tx.amount || 0);
-
         if (cat) {
             const catTranslatedName = getCategoryName(cat);
-            if (cat.type === 'Receita') {
-                totalIncome += amount;
-            } else {
+            if (cat.type === 'Receita') totalIncome += amount;
+            else {
                 totalExpense += amount;
                 expenseByCatMap[catTranslatedName] = (expenseByCatMap[catTranslatedName] || 0) + amount;
             }
@@ -1143,52 +1333,38 @@ function renderDashboard() {
     });
 
     const balance = totalIncome - totalExpense;
-    const cardBal = document.getElementById('card-balance');
-    const cardInc = document.getElementById('card-income');
-    const cardExp = document.getElementById('card-expense');
-    
-    if (cardBal) cardBal.innerText = formatCurrency(balance);
-    if (cardInc) cardInc.innerText = formatCurrency(totalIncome);
-    if (cardExp) cardExp.innerText = formatCurrency(totalExpense);
+    document.getElementById('card-balance').innerText = formatCurrency(balance);
+    document.getElementById('card-income').innerText = formatCurrency(totalIncome);
+    document.getElementById('card-expense').innerText = formatCurrency(totalExpense);
 
     const badge = document.getElementById('balance-status-badge');
     if (badge) {
-        if (balance >= 0) {
-            badge.innerText = t.positiveBalance;
-            badge.className = "mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
-        } else {
-            badge.innerText = t.negativeBalance;
-            badge.className = "mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300";
-        }
+        badge.innerText = balance >= 0 ? t.positiveBalance : t.negativeBalance;
+        badge.className = balance >= 0
+            ? "mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+            : "mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300";
     }
 
     const sortedTx = [...filteredTx].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
     const recentContainer = document.getElementById('recent-transactions-list');
     if (recentContainer) {
-        recentContainer.innerHTML = '';
-        if (sortedTx.length === 0) {
-            recentContainer.innerHTML = `<p class="text-xs text-slate-400 italic">${t.noRecords}</p>`;
-        } else {
-            sortedTx.forEach(tx => {
-                const catId = tx.categoryId;
-                const cat = categories.find(c => c.id === Number(catId)) || { id: 13, name: 'Outros', type: 'Despesa' };
-                const catName = getCategoryName(cat);
+        recentContainer.innerHTML = sortedTx.length === 0
+            ? `<p class="text-xs text-slate-400 italic">${t.noRecords}</p>`
+            : sortedTx.map(tx => {
+                const cat = categories.find(c => c.id === Number(tx.categoryId)) || { id: 13, name: 'Outros', type: 'Despesa' };
                 const isIncome = cat.type === 'Receita';
-                const amount = Number(tx.amount || 0);
-
-                recentContainer.innerHTML += `
+                return `
                     <div class="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700">
                         <div>
-                            <p class="font-medium text-slate-800 dark:text-slate-200">${tx.description} ${tx.isRecurring ? '<i class="fa-solid fa-rotate text-indigo-500 text-[10px]" title="Recorrente"></i>' : ''}</p>
-                            <p class="text-[10px] text-slate-400">${catName} • ${tx.date}</p>
+                            <p class="font-medium text-slate-800 dark:text-slate-200">${tx.description}</p>
+                            <p class="text-[10px] text-slate-400">${getCategoryName(cat)} • ${tx.date}</p>
                         </div>
                         <span class="font-semibold ${isIncome ? 'text-emerald-600' : 'text-slate-700 dark:text-slate-300'}">
-                            ${isIncome ? '+' : '-'}${formatCurrency(amount)}
+                            ${isIncome ? '+' : '-'}${formatCurrency(Number(tx.amount || 0))}
                         </span>
                     </div>
                 `;
-            });
-        }
+            }).join('');
     }
 
     renderChart(expenseByCatMap);
@@ -1200,16 +1376,13 @@ function renderDashboard() {
 function renderChart(dataMap) {
     const canvas = document.getElementById('expensesChart');
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     const labels = Object.keys(dataMap);
     const values = Object.values(dataMap);
     const colors = ['#6366f1', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#06b6d4', '#f43f5e'];
-
-    const total = values.reduce((acc, curr) => acc + curr, 0);
+    const total = values.reduce((a, b) => a + b, 0);
 
     if (myChart) myChart.destroy();
-
     if (labels.length === 0) {
         myChart = new Chart(ctx, {
             type: 'doughnut',
@@ -1220,29 +1393,19 @@ function renderChart(dataMap) {
     }
 
     const plugins = typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : [];
-
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: labels,
+            labels,
             datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 2, borderColor: '#ffffff' }]
         },
-        plugins: plugins,
+        plugins,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
             plugins: {
                 legend: { position: 'right' },
-                tooltip: { 
-                    callbacks: { 
-                        label: (ctx) => {
-                            const val = ctx.raw;
-                            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                            return ` ${ctx.label}: ${formatCurrency(val)} (${pct}%)`;
-                        } 
-                    } 
-                },
                 datalabels: {
                     color: '#fff',
                     font: { weight: 'bold', size: 11 },
@@ -1263,113 +1426,46 @@ function renderAnnualChart() {
 
     const t = i18n[currentLang] || i18n['pt-BR'];
     const currentYear = String(new Date().getFullYear());
-
     const yearsSet = new Set([currentYear]);
-    transactions
-        .filter(tx => (tx.currency || 'BRL') === currentCurrency && tx.date && tx.date.length >= 4)
-        .forEach(tx => yearsSet.add(tx.date.substring(0, 4)));
+    transactions.filter(tx => (tx.currency || 'BRL') === currentCurrency && tx.date).forEach(tx => yearsSet.add(tx.date.substring(0, 4)));
 
     const sortedYears = Array.from(yearsSet).sort().reverse();
     const prevSelectedYear = yearSelect.value;
-
-    yearSelect.innerHTML = `<option value="ALL">${t.allYears}</option>` +
-        sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
-
-    if (prevSelectedYear === 'ALL' || sortedYears.includes(prevSelectedYear)) {
-        yearSelect.value = prevSelectedYear;
-    } else {
-        yearSelect.value = currentYear;
-    }
+    yearSelect.innerHTML = `<option value="ALL">${t.allYears}</option>` + sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+    yearSelect.value = (prevSelectedYear === 'ALL' || sortedYears.includes(prevSelectedYear)) ? prevSelectedYear : currentYear;
 
     const selectedYear = yearSelect.value;
-
     const monthlyExpenses = new Array(12).fill(0);
     const monthlyIncome = new Array(12).fill(0);
 
     transactions.forEach(tx => {
-        if ((tx.currency || 'BRL') !== currentCurrency) return;
-        if (!tx.date || tx.date.length < 7) return;
+        if ((tx.currency || 'BRL') !== currentCurrency || !tx.date || tx.date.length < 7) return;
         if (selectedYear !== 'ALL' && !tx.date.startsWith(selectedYear)) return;
-
-        const monthIndex = parseInt(tx.date.substring(5, 7), 10) - 1;
-        if (monthIndex < 0 || monthIndex > 11) return;
-
+        const mIdx = parseInt(tx.date.substring(5, 7), 10) - 1;
+        if (mIdx < 0 || mIdx > 11) return;
         const cat = categories.find(c => c.id === Number(tx.categoryId));
-        const amount = Number(tx.amount || 0);
-
-        if (cat && cat.type === 'Receita') {
-            monthlyIncome[monthIndex] += amount;
-        } else {
-            monthlyExpenses[monthIndex] += amount;
-        }
+        if (cat && cat.type === 'Receita') monthlyIncome[mIdx] += Number(tx.amount || 0);
+        else monthlyExpenses[mIdx] += Number(tx.amount || 0);
     });
 
-    const langLocale = currentLang === 'ja' ? 'ja-JP' :
-                       currentLang === 'es' ? 'es-ES' :
-                       currentLang === 'en' ? 'en-US' : 'pt-BR';
-
+    const langLocale = currentLang === 'ja' ? 'ja-JP' : currentLang === 'es' ? 'es-ES' : currentLang === 'en' ? 'en-US' : 'pt-BR';
     const refYear = selectedYear === 'ALL' ? Number(currentYear) : Number(selectedYear);
-    const monthLabels = Array.from({ length: 12 }, (_, i) => {
-        const label = new Date(refYear, i, 1).toLocaleString(langLocale, { month: 'short' });
-        return label.charAt(0).toUpperCase() + label.slice(1).replace('.', '');
-    });
+    const monthLabels = Array.from({ length: 12 }, (_, i) => new Date(refYear, i, 1).toLocaleString(langLocale, { month: 'short' }));
 
     if (annualChart) annualChart.destroy();
-
-    const isDark = document.documentElement.classList.contains('dark');
-    const gridColor = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)';
-    const textColor = isDark ? '#cbd5e1' : '#475569';
-
     annualChart = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: monthLabels,
             datasets: [
-                {
-                    label: t.chartExpensesLabel,
-                    data: monthlyExpenses,
-                    backgroundColor: '#f43f5e',
-                    borderRadius: 6,
-                    maxBarThickness: 28
-                },
-                {
-                    label: t.chartIncomeLabel,
-                    data: monthlyIncome,
-                    backgroundColor: '#10b981',
-                    borderRadius: 6,
-                    maxBarThickness: 28
-                }
+                { label: t.chartExpensesLabel, data: monthlyExpenses, backgroundColor: '#f43f5e', borderRadius: 6, maxBarThickness: 28 },
+                { label: t.chartIncomeLabel, data: monthlyIncome, backgroundColor: '#10b981', borderRadius: 6, maxBarThickness: 28 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { color: textColor }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridColor },
-                    ticks: {
-                        color: textColor,
-                        callback: (value) => formatCurrency(value)
-                    }
-                }
-            }
+            scales: { y: { beginAtZero: true } }
         }
     });
 }
@@ -1383,83 +1479,49 @@ function renderTransactionsTable() {
     const filterCat = document.getElementById('tx-filter-category')?.value || 'ALL';
     const filterMethod = document.getElementById('tx-filter-method')?.value || 'ALL';
     const filterStatus = document.getElementById('tx-filter-status')?.value || 'ALL';
-    
     const filterDateStart = document.getElementById('tx-filter-date-start')?.value || '';
     const filterDateEnd = document.getElementById('tx-filter-date-end')?.value || '';
 
-    tbody.innerHTML = '';
-
     const filteredList = transactions.filter(tx => {
         if ((tx.currency || 'BRL') !== currentCurrency) return false;
-
-        const catId = String(tx.categoryId);
-        const methodId = String(tx.paymentMethodId);
-        const desc = (tx.description || '').toLowerCase();
-        const notes = (tx.notes || '').toLowerCase();
-
-        const matchSearch = !searchText || desc.includes(searchText) || notes.includes(searchText);
-        const matchCat = filterCat === 'ALL' || catId === filterCat;
-        const matchMethod = filterMethod === 'ALL' || methodId === filterMethod;
+        const matchSearch = !searchText || (tx.description || '').toLowerCase().includes(searchText) || (tx.notes || '').toLowerCase().includes(searchText);
+        const matchCat = filterCat === 'ALL' || String(tx.categoryId) === filterCat;
+        const matchMethod = filterMethod === 'ALL' || String(tx.paymentMethodId) === filterMethod;
         const matchStatus = filterStatus === 'ALL' || tx.status === filterStatus;
-        
         const matchStart = !filterDateStart || tx.date >= filterDateStart;
         const matchEnd = !filterDateEnd || tx.date <= filterDateEnd;
-
         return matchSearch && matchCat && matchMethod && matchStatus && matchStart && matchEnd;
-    });
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    const sortedList = [...filteredList].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (sortedList.length === 0) {
+    if (filteredList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-xs text-slate-400 italic">${t.noRecords}</td></tr>`;
         return;
     }
 
-    sortedList.forEach(tx => {
-        const catId = tx.categoryId;
-        const methodId = tx.paymentMethodId;
-        const cat = categories.find(c => c.id === Number(catId)) || { id: 13, name: 'Outros', type: 'Despesa' };
-        const method = methods.find(m => m.id === Number(methodId)) || { id: 2, name: 'Dinheiro' };
-        
-        const catName = getCategoryName(cat);
-        const methodName = getMethodName(method);
-
+    tbody.innerHTML = filteredList.map(tx => {
+        const cat = categories.find(c => c.id === Number(tx.categoryId)) || { id: 13, name: 'Outros', type: 'Despesa' };
+        const method = methods.find(m => m.id === Number(tx.paymentMethodId)) || { id: 2, name: 'Dinheiro' };
         const isIncome = cat.type === 'Receita';
-        const amount = Number(tx.amount || 0);
-
         const isPaid = tx.status === 'paid';
         const statusBadge = isPaid
-            ? `<button onclick="toggleTxStatus(${tx.id})" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 hover:opacity-80 transition cursor-pointer"><i class="fa-solid fa-check mr-1"></i>${t.statusPaid}</button>`
-            : `<button onclick="toggleTxStatus(${tx.id})" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 hover:opacity-80 transition cursor-pointer"><i class="fa-solid fa-clock mr-1"></i>${t.statusPending}</button>`;
+            ? `<button onclick="toggleTxStatus(${tx.id})" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">${t.statusPaid}</button>`
+            : `<button onclick="toggleTxStatus(${tx.id})" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">${t.statusPending}</button>`;
 
-        let notesDisplay = '-';
-        if (tx.notes && tx.notes.trim() !== '') {
-            const isUrl = tx.notes.startsWith('http://') || tx.notes.startsWith('https://');
-            if (isUrl) {
-                notesDisplay = `<a href="${tx.notes}" target="_blank" class="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-lg"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Link</a>`;
-            } else {
-                notesDisplay = `<span class="text-xs text-slate-600 dark:text-slate-300 truncate max-w-[150px] inline-block" title="${tx.notes}">${tx.notes}</span>`;
-            }
-        }
-
-        tbody.innerHTML += `
+        return `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30">
                 <td class="p-4 text-slate-500 text-xs">${tx.date}</td>
-                <td class="p-4 font-medium text-slate-800 dark:text-slate-200 text-xs">
-                    ${tx.description}
-                    ${tx.isRecurring ? '<i class="fa-solid fa-rotate text-indigo-500 text-[10px] ml-1" title="Fixa/Recorrente"></i>' : ''}
-                </td>
-                <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700">${catName}</span></td>
-                <td class="p-4 text-slate-600 dark:text-slate-400 text-xs">${methodName}</td>
-                <td class="p-4 text-right font-bold text-xs ${isIncome ? 'text-emerald-600' : ''}">${isIncome ? '+' : '-'}${formatCurrency(amount, tx.currency)}</td>
+                <td class="p-4 font-medium text-slate-800 dark:text-slate-200 text-xs">${tx.description}</td>
+                <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700">${getCategoryName(cat)}</span></td>
+                <td class="p-4 text-slate-600 dark:text-slate-400 text-xs">${getMethodName(method)}</td>
+                <td class="p-4 text-right font-bold text-xs ${isIncome ? 'text-emerald-600' : ''}">${isIncome ? '+' : '-'}${formatCurrency(Number(tx.amount || 0), tx.currency)}</td>
                 <td class="p-4 text-center">${statusBadge}</td>
-                <td class="p-4 text-center">${notesDisplay}</td>
+                <td class="p-4 text-center text-xs text-slate-500 max-w-[140px] truncate" title="${tx.notes || ''}">${tx.notes || '-'}</td>
                 <td class="p-4 text-center">
                     <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
         `;
-    });
+    }).join('');
 }
 
 function saveTransaction(e) {
@@ -1475,286 +1537,41 @@ function saveTransaction(e) {
     const assignedTargetId = document.getElementById('tx-target-assign').value;
     const isRecurring = document.getElementById('tx-is-recurring')?.checked || false;
 
-    const txMonth = date.substring(0, 7);
-
     transactions.push({
         id: Date.now(),
         description: desc,
-        amount: amount,
+        amount,
         currency: txCurrency,
-        date: date,
+        date,
         categoryId: catId,
         paymentMethodId: methodId,
-        status: status,
-        isRecurring: isRecurring,
-        notes: notes
+        status,
+        isRecurring,
+        notes
     });
 
     if (assignedTargetId) {
-        let targets = getTargets();
-        const targetIndex = targets.findIndex(t => t.id === Number(assignedTargetId));
-        if (targetIndex !== -1) {
-            targets[targetIndex].saved = (targets[targetIndex].saved || 0) + amount;
+        const targets = getTargets();
+        const idx = targets.findIndex(t => t.id === Number(assignedTargetId));
+        if (idx !== -1) {
+            targets[idx].saved = (targets[idx].saved || 0) + amount;
             localStorage.setItem('finc_targets_list', JSON.stringify(targets));
         }
     }
 
-    if (!activeCurrencies.includes(txCurrency)) {
-        activeCurrencies.push(txCurrency);
-        localStorage.setItem('finc_active_currencies', JSON.stringify(activeCurrencies));
-    }
-
+    if (!activeCurrencies.includes(txCurrency)) activeCurrencies.push(txCurrency);
     currentCurrency = txCurrency;
-    localStorage.setItem('finc_active_currency', currentCurrency);
-    localStorage.setItem('finc_transactions', JSON.stringify(transactions));
+    pushStateToCloud();
 
-    populateMonthFilterOptions(txMonth);
+    populateMonthFilterOptions(date.substring(0, 7));
     renderWalletCards();
     renderDashboard();
     renderTransactionsTable();
-    triggerAutoBackup();
-    
     closeModal('modal-transaction');
     document.getElementById('form-transaction').reset();
     document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('tx-currency').value = currentCurrency;
 }
 
-// ==========================================
-// MÓDULO: LISTA DE COMPRAS INTELIGENTE
-// ==========================================
-function saveShoppingList() {
-    localStorage.setItem('finc_shopping_list', JSON.stringify(shoppingList));
-    renderShoppingList();
-    triggerAutoBackup();
-}
-
-function toggleShoppingItem(id) {
-    const item = shoppingList.find(i => i.id === id);
-    if (item) {
-        item.checked = !item.checked;
-        saveShoppingList();
-    }
-}
-
-function updateShoppingCategoryDropdown() {
-    const t = i18n[currentLang] || i18n['pt-BR'];
-    const catSelect = document.getElementById('shop-item-cat');
-    const lblCat = document.getElementById('lbl-shop-item-cat');
-    if (lblCat) lblCat.innerText = t.shopItemCat || "Categoria";
-    if (!catSelect || !t.shopCategories) return;
-
-    const currentVal = catSelect.value || 'breakfast';
-    catSelect.innerHTML = Object.entries(t.shopCategories)
-        .map(([key, label]) => `<option value="${key}">${label}</option>`)
-        .join('');
-    catSelect.value = currentVal;
-}
-
-function addShoppingItem(e) {
-    e.preventDefault();
-    const nameInput = document.getElementById('shop-item-name');
-    const catInput = document.getElementById('shop-item-cat');
-    const qtyInput = document.getElementById('shop-item-qty');
-    const priceInput = document.getElementById('shop-item-price');
-
-    const name = nameInput.value.trim();
-    const category = catInput ? catInput.value : 'kitchen';
-    const qty = qtyInput.value.trim() || '1';
-    const price = parseFloat(priceInput.value) || 0;
-
-    if (!name) return;
-
-    shoppingList.unshift({
-        id: Date.now(),
-        name,
-        category,
-        qty,
-        price,
-        checked: false,
-        currency: currentCurrency
-    });
-
-    nameInput.value = '';
-    qtyInput.value = '1';
-    priceInput.value = '';
-    saveShoppingList();
-}
-
-function updateShoppingItemQty(id, newQty) {
-    const item = shoppingList.find(i => i.id === id);
-    if (item) {
-        const trimmed = String(newQty).trim();
-        item.qty = trimmed || '1';
-        saveShoppingList();
-    }
-}
-
-function stepShoppingItemQty(id, delta) {
-    const item = shoppingList.find(i => i.id === id);
-    if (!item) return;
-
-    const currentStr = String(item.qty || '1').trim();
-    const match = currentStr.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
-
-    if (match) {
-        const num = parseFloat(match[1].replace(',', '.'));
-        const unit = match[2] ? ` ${match[2]}` : '';
-        const nextNum = Math.max(1, num + delta);
-        item.qty = `${nextNum}${unit}`;
-    } else {
-        item.qty = delta > 0 ? '2' : '1';
-    }
-    saveShoppingList();
-}
-
-function deleteShoppingItem(id) {
-    shoppingList = shoppingList.filter(i => i.id !== id);
-    saveShoppingList();
-}
-
-function clearCheckedShoppingItems() {
-    shoppingList = shoppingList.map(item => {
-        if (item.checked && (item.currency || currentCurrency) === currentCurrency) {
-            return { ...item, checked: false, price: 0 };
-        }
-        return item;
-    });
-    saveShoppingList();
-}
-
-function renderShoppingList() {
-    updateShoppingCategoryDropdown();
-
-    const container = document.getElementById('shopping-list-container');
-    const countEl = document.getElementById('shop-items-count');
-    if (!container) return;
-
-    const t = i18n[currentLang] || i18n['pt-BR'];
-    const shopCats = t.shopCategories || {
-        breakfast: "☕ Café da Manhã",
-        kitchen: "🍳 Cozinha / Despensa",
-        cleaning: "🧼 Limpeza",
-        hygiene: "🧴 Higiene / Outros"
-    };
-
-    const currentItems = shoppingList.filter(i => (i.currency || currentCurrency) === currentCurrency);
-    if (countEl) countEl.innerText = currentItems.length;
-
-    updateShoppingCartTotalDisplay();
-
-    if (currentItems.length === 0) {
-        container.innerHTML = `<p class="p-6 text-center text-xs text-slate-400 italic">Sua lista de compras está vazia. Adicione o que precisa comprar acima.</p>`;
-        return;
-    }
-
-    let html = '';
-    Object.entries(shopCats).forEach(([catKey, catLabel]) => {
-        const itemsInCat = currentItems.filter(i => {
-            const normalizedCat = (i.category === 'lunch' || i.category === 'dinner' || !i.category) ? 'kitchen' : i.category;
-            return normalizedCat === catKey;
-        });
-
-        if (itemsInCat.length === 0) return;
-
-        html += `
-            <div class="bg-slate-100/80 dark:bg-slate-700/40 px-4 py-2 flex justify-between items-center border-y border-slate-200/60 dark:border-slate-700">
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-200">${catLabel}</span>
-                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">${itemsInCat.length} ${itemsInCat.length === 1 ? 'item' : 'itens'}</span>
-            </div>
-        `;
-
-        html += itemsInCat.map(item => `
-            <div class="p-3.5 px-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 transition-colors ${item.checked ? 'bg-slate-50/80 dark:bg-slate-800/40' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}">
-                <div class="flex items-center gap-3 flex-1 min-w-[160px]">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer flex-shrink-0">
-                    <div class="truncate">
-                        <p class="text-sm font-semibold ${item.checked ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-100'}">${item.name}</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 ml-auto">
-                    <div class="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-                        <button type="button" onclick="stepShoppingItemQty(${item.id}, -1)" class="px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Diminuir">-</button>
-                        <input type="text" value="${item.qty}" 
-                               onchange="updateShoppingItemQty(${item.id}, this.value)"
-                               aria-label="Quantidade"
-                               class="w-16 px-1 py-1 text-center bg-transparent text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none">
-                        <button type="button" onclick="stepShoppingItemQty(${item.id}, 1)" class="px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Aumentar">+</button>
-                    </div>
-
-                    <input type="number" step="0.01" min="0" value="${item.price || ''}" placeholder="Preço un." 
-                           oninput="updateShoppingItemPrice(${item.id}, this.value)"
-                           class="w-24 px-2.5 py-1 text-right bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold">
-                    
-                    <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-600 p-1.5" title="Excluir item permanentemente">
-                        <i class="fa-solid fa-trash text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    });
-
-    container.innerHTML = html;
-}
-
-function finishShoppingAndRecord() {
-    const checkedItems = shoppingList.filter(i => i.checked && (i.currency || currentCurrency) === currentCurrency);
-    if (checkedItems.length === 0) {
-        alert("Marque pelo menos um item no carrinho antes de concluir a compra.");
-        return;
-    }
-
-    const total = checkedItems.reduce((sum, item) => {
-        const unitPrice = Number(item.price || 0);
-        const qtyNum = getNumericQty(item.qty);
-        return sum + (unitPrice * qtyNum);
-    }, 0);
-
-    if (total <= 0) {
-        alert("Informe o valor dos itens marcados para lançar a despesa.");
-        return;
-    }
-
-    const selectedMethodId = Number(document.getElementById('shop-payment-method')?.value || 1);
-    const methodObj = methods.find(m => m.id === selectedMethodId);
-    const methodName = getMethodName(methodObj);
-    const itemNames = checkedItems.map(i => `${i.name} (${i.qty})`).join(', ');
-
-    if (confirm(`Deseja lançar uma despesa de ${formatCurrency(total)} (${methodName}) em Alimentação? Os itens permanecerão salvos na sua lista para futuras compras.`)) {
-        transactions.push({
-            id: Date.now(),
-            description: `Compras de Casa (${checkedItems.length} itens)`,
-            amount: total,
-            currency: currentCurrency,
-            date: new Date().toISOString().split('T')[0],
-            categoryId: 8,
-            paymentMethodId: selectedMethodId,
-            status: 'paid',
-            isRecurring: false,
-            notes: itemNames
-        });
-
-        localStorage.setItem('finc_transactions', JSON.stringify(transactions));
-
-        shoppingList = shoppingList.map(item => {
-            if (item.checked && (item.currency || currentCurrency) === currentCurrency) {
-                return { ...item, checked: false, price: 0 };
-            }
-            return item;
-        });
-
-        saveShoppingList();
-        populateMonthFilterOptions();
-        renderDashboard();
-        renderTransactionsTable();
-        switchTab('transactions');
-    }
-}
-
-// ==========================================
-// MÓDULO: METAS FINANCEIRAS
-// ==========================================
 function getTargets() {
     const data = localStorage.getItem('finc_targets_list');
     return data ? JSON.parse(data) : [];
@@ -1762,12 +1579,9 @@ function getTargets() {
 
 function saveNewTarget(e) {
     if (e) e.preventDefault();
-
     const tLang = i18n[currentLang] || i18n['pt-BR'];
     const targets = getTargets();
-    const currTargets = targets.filter(t => (t.currency || 'BRL') === currentCurrency);
-
-    if (currTargets.length >= 3) {
+    if (targets.filter(t => (t.currency || 'BRL') === currentCurrency).length >= 3) {
         alert(tLang.limitReachedAlert);
         return;
     }
@@ -1777,27 +1591,13 @@ function saveNewTarget(e) {
     const savedAmount = parseFloat(document.getElementById('target-saved')?.value || 0);
     const date = document.getElementById('target-date').value;
 
-    if (name && !isNaN(amount) && amount > 0 && date) {
-        targets.push({
-            id: Date.now(),
-            name: name,
-            amount: amount,
-            saved: isNaN(savedAmount) ? 0 : savedAmount,
-            date: date,
-            currency: currentCurrency
-        });
-
+    if (name && amount > 0 && date) {
+        targets.push({ id: Date.now(), name, amount, saved: isNaN(savedAmount) ? 0 : savedAmount, date, currency: currentCurrency });
         localStorage.setItem('finc_targets_list', JSON.stringify(targets));
-        
-        document.getElementById('target-name').value = '';
-        document.getElementById('target-amount').value = '';
-        if (document.getElementById('target-saved')) document.getElementById('target-saved').value = '';
-        document.getElementById('target-date').value = '';
-
+        pushStateToCloud();
         closeModal('modal-target');
         renderDashboard();
         renderModalTargetsList();
-        triggerAutoBackup();
     }
 }
 
@@ -1807,68 +1607,43 @@ function updateTargetUI() {
 
     const tLang = i18n[currentLang] || i18n['pt-BR'];
     const colors = getTargetColors();
-    let targets = getTargets().filter(t => (t.currency || 'BRL') === currentCurrency);
+    const targets = getTargets().filter(t => (t.currency || 'BRL') === currentCurrency);
     container.innerHTML = '';
-    const today = new Date().toISOString().split('T')[0];
 
     for (let i = 0; i < 3; i++) {
         const tgt = targets[i];
         const color = colors[i];
-
         if (tgt) {
-            const savedVal = tgt.saved !== undefined ? tgt.saved : 0;
-            const pct = Math.min(Math.round((savedVal / tgt.amount) * 100), 100);
-            const isExpired = today > tgt.date && pct < 100;
-
-            let msgText = tLang.inProgress;
-            let msgColor = color.text;
-
-            if (pct >= 100) {
-                msgText = tLang.targetReached;
-                msgColor = 'text-emerald-600 font-bold';
-            } else if (isExpired) {
-                msgText = tLang.targetExpired;
-                msgColor = 'text-rose-500 font-semibold';
-            }
-
+            const pct = Math.min(Math.round(((tgt.saved || 0) / tgt.amount) * 100), 100);
             container.innerHTML += `
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 ${color.border}/30 shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1.5 h-full ${color.bg}"></div>
-                    <div class="pl-2">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 ${color.border}/30 shadow-sm flex flex-col justify-between">
+                    <div>
                         <div class="flex justify-between items-start mb-2">
                             <div>
-                                <span class="text-[10px] uppercase font-bold tracking-wider ${color.text} block">${color.name}</span>
-                                <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate max-w-[140px]">${tgt.name}</h4>
+                                <span class="text-[10px] uppercase font-bold ${color.text} block">${color.name}</span>
+                                <h4 class="font-bold text-sm text-slate-900 dark:text-white">${tgt.name}</h4>
                             </div>
                             <span class="text-xs font-extrabold ${color.text}">${pct}%</span>
                         </div>
-                        
-                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden my-2">
-                            <div class="${color.bg} h-full transition-all duration-500" style="width: ${pct}%"></div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden my-2">
+                            <div class="${color.bg} h-full" style="width: ${pct}%"></div>
                         </div>
-
-                        <div class="flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                            <span>${tLang.lblAllocated} <strong class="${color.text}">${formatCurrency(savedVal)}</strong></span>
+                        <div class="flex justify-between text-[11px] text-slate-500">
+                            <span>${tLang.lblAllocated} <strong>${formatCurrency(tgt.saved || 0)}</strong></span>
                             <span>${tLang.lblTarget} <strong>${formatCurrency(tgt.amount)}</strong></span>
                         </div>
                     </div>
-
-                    <div class="flex justify-between items-center pt-3 mt-2 border-t border-slate-100 dark:border-slate-700/60 pl-2">
-                        <span class="text-[10px] ${msgColor}">${msgText}</span>
-                        <button onclick="openDepositModal(${tgt.id})" class="px-2.5 py-1 ${color.btnBg} text-white rounded-lg text-[11px] font-bold transition shadow-sm active:scale-95 flex items-center gap-1">
-                            <i class="fa-solid fa-plus text-[10px]"></i> ${tLang.btnDeposit}
-                        </button>
+                    <div class="flex justify-between items-center pt-2 mt-2 border-t border-slate-100 dark:border-slate-700">
+                        <span class="text-[10px] ${color.text}">${pct >= 100 ? tLang.targetReached : tLang.inProgress}</span>
+                        <button onclick="openDepositModal(${tgt.id})" class="px-2.5 py-1 ${color.btnBg} text-white rounded-lg text-[11px] font-bold">+ ${tLang.btnDeposit}</button>
                     </div>
                 </div>
             `;
         } else {
             container.innerHTML += `
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between items-center text-center py-5 opacity-70">
-                    <span class="text-[10px] uppercase font-bold tracking-wider ${color.text} block mb-1">${color.name}</span>
-                    <p class="text-[11px] text-slate-400 italic mb-2">${tLang.availableSpace}</p>
-                    <button onclick="openModal('modal-target')" class="text-xs font-semibold ${color.text} hover:underline">
-                        ${tLang.btnConfigure} (${color.name})
-                    </button>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center py-5 opacity-70">
+                    <span class="text-[10px] uppercase font-bold ${color.text} mb-1">${color.name}</span>
+                    <button onclick="openModal('modal-target')" class="text-xs font-semibold ${color.text} hover:underline">${tLang.btnConfigure}</button>
                 </div>
             `;
         }
@@ -1878,120 +1653,77 @@ function updateTargetUI() {
 function renderModalTargetsList() {
     const tLang = i18n[currentLang] || i18n['pt-BR'];
     const targets = getTargets().filter(t => (t.currency || 'BRL') === currentCurrency);
-    const colors = getTargetColors();
-    const countEl = document.getElementById('target-count');
     const listEl = document.getElementById('modal-targets-list');
-    const btnAdd = document.getElementById('btn-add-target');
-
+    const countEl = document.getElementById('target-count');
     if (countEl) countEl.innerText = targets.length;
-    if (btnAdd) btnAdd.disabled = targets.length >= 3;
-
     if (!listEl) return;
 
-    listEl.innerHTML = '';
-    if (targets.length === 0) {
-        listEl.innerHTML = `<p class="text-xs text-slate-400 italic">${tLang.noTargets}</p>`;
-        return;
-    }
-
-    targets.forEach((tgt, i) => {
-        const color = colors[i];
-        const savedVal = tgt.saved || 0;
-
-        listEl.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full ${color.bg}"></span>
-                        <p class="text-xs font-bold text-slate-800 dark:text-slate-100">${tgt.name} (${color.name})</p>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-0.5">
-                        ${tLang.lblAllocated} <strong class="${color.text}">${formatCurrency(savedVal, tgt.currency)}</strong> / ${formatCurrency(tgt.amount, tgt.currency)} • ${tLang.lblUntil}: ${tgt.date}
-                    </p>
-                </div>
-                <button onclick="deleteTarget(${tgt.id})" class="text-slate-400 hover:text-rose-500 p-1">
-                    <i class="fa-solid fa-trash text-sm"></i>
-                </button>
+    listEl.innerHTML = targets.length === 0
+        ? `<p class="text-xs text-slate-400 italic">${tLang.noTargets}</p>`
+        : targets.map(tgt => `
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                <p class="text-xs font-bold">${tgt.name} — ${formatCurrency(tgt.saved || 0)} / ${formatCurrency(tgt.amount)}</p>
+                <button onclick="deleteTarget(${tgt.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
-        `;
-    });
+        `).join('');
 }
 
 function updateTargetAssignDropdown() {
     const assignSelect = document.getElementById('tx-target-assign');
     if (!assignSelect) return;
-
     const t = i18n[currentLang] || i18n['pt-BR'];
     const targets = getTargets().filter(tgt => (tgt.currency || 'BRL') === currentCurrency);
-    const colors = getTargetColors();
-    assignSelect.innerHTML = `<option value="">${t.noTargetAssign}</option>`;
-
-    targets.forEach((tgt, i) => {
-        const color = colors[i];
-        assignSelect.innerHTML += `<option value="${tgt.id}">+ ${color.name}: ${tgt.name}</option>`;
-    });
+    assignSelect.innerHTML = `<option value="">${t.noTargetAssign}</option>` + targets.map(tgt => `<option value="${tgt.id}">+ ${tgt.name}</option>`).join('');
 }
 
 function deleteTarget(id) {
-    let targets = getTargets();
-    targets = targets.filter(t => t.id !== id);
+    const targets = getTargets().filter(t => t.id !== id);
     localStorage.setItem('finc_targets_list', JSON.stringify(targets));
+    pushStateToCloud();
     renderDashboard();
     renderModalTargetsList();
-    triggerAutoBackup();
 }
 
 function openDepositModal(targetId) {
-    const tLang = i18n[currentLang] || i18n['pt-BR'];
-    const targets = getTargets();
-    const target = targets.find(t => t.id === targetId);
-    if (!target) return;
-
     document.getElementById('deposit-target-id').value = targetId;
-    document.getElementById('modal-deposit-title').innerText = `${tLang.depositTitle}: ${target.name}`;
     document.getElementById('deposit-amount').value = '';
     openModal('modal-deposit');
 }
 
 function submitDeposit(e) {
     if (e) e.preventDefault();
-
     const targetId = Number(document.getElementById('deposit-target-id').value);
     const addVal = parseFloat(document.getElementById('deposit-amount').value);
-
-    if (!isNaN(addVal) && addVal > 0) {
-        let targets = getTargets();
-        const targetIndex = targets.findIndex(t => t.id === targetId);
-
-        if (targetIndex !== -1) {
-            targets[targetIndex].saved = (targets[targetIndex].saved || 0) + addVal;
+    if (addVal > 0) {
+        const targets = getTargets();
+        const idx = targets.findIndex(t => t.id === targetId);
+        if (idx !== -1) {
+            targets[idx].saved = (targets[idx].saved || 0) + addVal;
             localStorage.setItem('finc_targets_list', JSON.stringify(targets));
+            pushStateToCloud();
             closeModal('modal-deposit');
             renderDashboard();
-            triggerAutoBackup();
         }
     }
 }
 
 function toggleTxStatus(id) {
-    const index = transactions.findIndex(t => t.id === id);
-    if (index !== -1) {
-        transactions[index].status = transactions[index].status === 'paid' ? 'pending' : 'paid';
-        localStorage.setItem('finc_transactions', JSON.stringify(transactions));
+    const idx = transactions.findIndex(t => t.id === id);
+    if (idx !== -1) {
+        transactions[idx].status = transactions[idx].status === 'paid' ? 'pending' : 'paid';
+        pushStateToCloud();
         renderTransactionsTable();
         renderDashboard();
-        triggerAutoBackup();
     }
 }
 
 function deleteTransaction(id) {
     if (confirm('Deseja excluir esta transação?')) {
         transactions = transactions.filter(tx => tx.id !== Number(id));
-        localStorage.setItem('finc_transactions', JSON.stringify(transactions));
+        pushStateToCloud();
         populateMonthFilterOptions();
         renderDashboard();
         renderTransactionsTable();
-        triggerAutoBackup();
     }
 }
 
@@ -1999,102 +1731,77 @@ function switchTab(tabName) {
     ['dashboard', 'transactions', 'shopping'].forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         if (el) el.classList.toggle('hidden', t !== tabName);
+
+        const deskBtn = document.getElementById(`nav-${t}`);
+        if (deskBtn) {
+            if (t === tabName) {
+                deskBtn.className = "nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-indigo-600 bg-white dark:bg-slate-800 shadow-sm dark:text-white";
+            } else {
+                deskBtn.className = "nav-btn px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60";
+            }
+        }
+
+        const mobBtn = document.getElementById(`mob-nav-${t}`);
+        if (mobBtn) {
+            if (t === tabName) {
+                mobBtn.className = "mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300";
+            } else {
+                mobBtn.className = "mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300";
+            }
+        }
     });
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-indigo-600', 'dark:text-white', 'font-semibold');
-        btn.classList.add('text-slate-600', 'dark:text-slate-300', 'font-medium');
-    });
-
-    const activeBtn = document.getElementById(`nav-${tabName}`);
-    if (activeBtn) {
-        activeBtn.classList.add('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-indigo-600', 'dark:text-white', 'font-semibold');
-        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300', 'font-medium');
-    }
-
-    document.querySelectorAll('.mob-nav-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-900/40', 'dark:text-indigo-300', 'font-bold');
-        btn.classList.add('text-slate-600', 'dark:text-slate-300', 'font-medium');
-    });
-
-    const activeMobBtn = document.getElementById(`mob-nav-${tabName}`);
-    if (activeMobBtn) {
-        activeMobBtn.classList.add('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-900/40', 'dark:text-indigo-300', 'font-bold');
-        activeMobBtn.classList.remove('text-slate-600', 'dark:text-slate-300', 'font-medium');
-    }
 
     if (tabName === 'dashboard') {
         if (myChart) myChart.resize();
         if (annualChart) annualChart.resize();
     }
+    if (tabName === 'shopping') {
+        renderShoppingModule();
+    }
 }
 
 function updateCategoryDropdowns() {
     const t = i18n[currentLang] || i18n['pt-BR'];
-
     const catSelect = document.getElementById('tx-category');
     if (catSelect) {
-        catSelect.innerHTML = categories.map(c => {
-            const catName = getCategoryName(c);
-            const typeLabel = (c.type === 'Receita') ? t.typeIncome : t.typeExpense;
-            return `<option value="${c.id}">${catName} (${typeLabel})</option>`;
-        }).join('');
+        catSelect.innerHTML = categories.map(c => `<option value="${c.id}">${getCategoryName(c)} (${c.type === 'Receita' ? t.typeIncome : t.typeExpense})</option>`).join('');
     }
-
     const catFilter = document.getElementById('tx-filter-category');
     if (catFilter) {
-        const currentValue = catFilter.value || 'ALL';
-        catFilter.innerHTML = `<option value="ALL">${t.allCategories}</option>` + 
-            categories.map(c => `<option value="${c.id}">${getCategoryName(c)}</option>`).join('');
-        catFilter.value = currentValue;
+        catFilter.innerHTML = `<option value="ALL">${t.allCategories}</option>` + categories.map(c => `<option value="${c.id}">${getCategoryName(c)}</option>`).join('');
     }
 }
 
 function updateMethodDropdowns() {
     const t = i18n[currentLang] || i18n['pt-BR'];
-
     const methodSelect = document.getElementById('tx-method');
     if (methodSelect) {
         methodSelect.innerHTML = methods.map(m => `<option value="${m.id}">${getMethodName(m)}</option>`).join('');
     }
-
     const methodFilter = document.getElementById('tx-filter-method');
     if (methodFilter) {
-        const currentValue = methodFilter.value || 'ALL';
-        methodFilter.innerHTML = `<option value="ALL">${t.allMethods}</option>` + 
-            methods.map(m => `<option value="${m.id}">${getMethodName(m)}</option>`).join('');
-        methodFilter.value = currentValue;
-    }
-
-    const shopMethodSelect = document.getElementById('shop-payment-method');
-    if (shopMethodSelect) {
-        const currentShopMethod = shopMethodSelect.value || '1';
-        shopMethodSelect.innerHTML = methods.map(m => `<option value="${m.id}">${getMethodName(m)}</option>`).join('');
-        shopMethodSelect.value = currentShopMethod;
+        methodFilter.innerHTML = `<option value="ALL">${t.allMethods}</option>` + methods.map(m => `<option value="${m.id}">${getMethodName(m)}</option>`).join('');
     }
 }
 
-function openModal(id) { 
+function openModal(id) {
     const modal = document.getElementById(id);
     if (modal) {
         modal.classList.remove('hidden');
-        if (id === 'modal-target') {
-            renderModalTargetsList();
-        }
+        if (id === 'modal-target') renderModalTargetsList();
         if (id === 'modal-transaction') {
-            const txCurrSelect = document.getElementById('tx-currency');
-            if (txCurrSelect) txCurrSelect.value = currentCurrency;
+            document.getElementById('tx-currency').value = currentCurrency;
             updateTargetAssignDropdown();
         }
     }
 }
 
-function closeModal(id) { 
+function closeModal(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.classList.add('hidden'); 
+    if (modal) modal.classList.add('hidden');
 }
 
-function toggleDarkMode() { 
+function toggleDarkMode() {
     document.documentElement.classList.toggle('dark');
     renderAnnualChart();
 }
@@ -2106,120 +1813,77 @@ function resetData() {
     }
 }
 
-function triggerAutoBackup() {
-    const backupData = {
-        version: "2.3",
-        autoBackupDate: new Date().toISOString(),
-        categories,
-        methods,
-        transactions,
-        shoppingList,
-        targets: getTargets(),
-        activeCurrencies,
-        currentCurrency,
-        lang: currentLang
-    };
-
-    localStorage.setItem('finc_auto_backup_snapshot', JSON.stringify(backupData));
-    updateSaveIndicator();
-}
-
 function updateSaveIndicator() {
     const indicator = document.getElementById('save-status-indicator');
-    if (indicator) {
-        const t = i18n[currentLang] || i18n['pt-BR'];
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        indicator.classList.remove('animate-pop');
-        void indicator.offsetWidth;
-        indicator.classList.add('animate-pop');
-
-        indicator.innerHTML = `<i class="fa-solid fa-shield-halved text-emerald-500"></i> <span id="lbl-save-status">${t.saveStatus}</span> (${now})`;
+    if (!indicator) return;
+    const t = i18n[currentLang] || i18n['pt-BR'];
+    if (currentUser) {
+        indicator.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-indigo-500 text-sm"></i> <span>${t.saveStatusCloud}</span>`;
+    } else {
+        indicator.innerHTML = `<i class="fa-solid fa-shield-halved text-emerald-500 text-sm"></i> <span>${t.saveStatusLocal}</span>`;
     }
 }
 
 function exportToPDF() {
     const element = document.getElementById('tab-dashboard');
     if (typeof html2pdf !== 'undefined') {
-        const opt = {
-            margin:       0.5,
-            filename:     `Relatorio_Financeiro_${currentCurrency}_${new Date().toISOString().split('T')[0]}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
+        html2pdf().set({
+            margin: 0.5,
+            filename: `Relatorio_Financeiro_${currentCurrency}_${new Date().toISOString().split('T')[0]}.pdf`,
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        }).from(element).save();
     } else {
         window.print();
     }
 }
 
 function sendByEmail() {
-    const filterSelect = document.getElementById('dash-month-filter');
-    const monthText = filterSelect ? filterSelect.options[filterSelect.selectedIndex].text : 'Geral';
     const balance = document.getElementById('card-balance')?.innerText || '0';
     const income = document.getElementById('card-income')?.innerText || '0';
     const expense = document.getElementById('card-expense')?.innerText || '0';
-
-    const subject = encodeURIComponent(`Resumo Financeiro - ${monthText} (${currentCurrency})`);
-    const body = encodeURIComponent(
-        `Resumo Financeiro (${monthText}):\n\n` +
-        `• Saldo Total: ${balance}\n` +
-        `• Total Receitas: ${income}\n` +
-        `• Total Despesas: ${expense}\n\n` +
-        `Relatório gerado pelo Controle de Finanças.`
-    );
-
+    const subject = encodeURIComponent(`Resumo Financeiro (${currentCurrency})`);
+    const body = encodeURIComponent(`Saldo Total: ${balance}\nTotal Receitas: ${income}\nTotal Despesas: ${expense}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
 
 function exportBackup() {
     const backupData = {
-        version: "2.3",
+        version: "3.0",
         exportDate: new Date().toISOString(),
         categories,
         methods,
         transactions,
-        shoppingList,
         targets: getTargets(),
         activeCurrencies,
         currentCurrency,
-        lang: currentLang
+        houseRooms,
+        shoppingItems
     };
-
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `controle_financas_backup_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const a = document.createElement('a');
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", `controle_financas_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
 
 function importBackup(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (!data.transactions || !Array.isArray(data.transactions)) {
-                alert("Ficheiro de backup inválido.");
-                return;
-            }
-
-            if (confirm("Deseja substituir seus dados atuais pelos dados do backup?")) {
-                if (data.categories) localStorage.setItem('finc_categories', JSON.stringify(data.categories));
-                if (data.methods) localStorage.setItem('finc_methods', JSON.stringify(data.methods));
-                if (data.transactions) localStorage.setItem('finc_transactions', JSON.stringify(data.transactions));
-                if (data.shoppingList) localStorage.setItem('finc_shopping_list', JSON.stringify(data.shoppingList));
+            if (!data.transactions) return alert("Ficheiro inválido.");
+            if (confirm("Substituir dados atuais pelo backup?")) {
+                if (data.transactions) transactions = data.transactions;
                 if (data.targets) localStorage.setItem('finc_targets_list', JSON.stringify(data.targets));
-                if (data.activeCurrencies) localStorage.setItem('finc_active_currencies', JSON.stringify(data.activeCurrencies));
-                if (data.currentCurrency) localStorage.setItem('finc_active_currency', data.currentCurrency);
-                if (data.lang) localStorage.setItem('finc_lang', data.lang);
-
-                alert("Backup restaurado com sucesso!");
+                if (data.activeCurrencies) activeCurrencies = data.activeCurrencies;
+                if (data.houseRooms) houseRooms = data.houseRooms;
+                if (data.shoppingItems) shoppingItems = data.shoppingItems;
+                pushStateToCloud();
                 location.reload();
             }
         } catch (err) {
@@ -2227,35 +1891,4 @@ function importBackup(event) {
         }
     };
     reader.readAsText(file);
-}
-
-function getNumericQty(qtyStr) {
-    const match = String(qtyStr || '1').trim().match(/^(\d+(?:[.,]\d+)?)/);
-    return match ? parseFloat(match[1].replace(',', '.')) : 1;
-}
-
-function updateShoppingItemPrice(id, newPrice) {
-    const item = shoppingList.find(i => i.id === id);
-    if (item) {
-        item.price = parseFloat(newPrice) || 0;
-        item.checked = item.price > 0;
-        localStorage.setItem('finc_shopping_list', JSON.stringify(shoppingList));
-        updateShoppingCartTotalDisplay();
-        triggerAutoBackup();
-    }
-}
-
-function updateShoppingCartTotalDisplay() {
-    const totalEl = document.getElementById('shop-total-amount');
-    if (!totalEl) return;
-
-    const currentItems = shoppingList.filter(i => (i.currency || currentCurrency) === currentCurrency);
-    const cartTotal = currentItems.reduce((sum, item) => {
-        if (!item.checked) return sum;
-        const unitPrice = Number(item.price || 0);
-        const qtyNum = getNumericQty(item.qty);
-        return sum + (unitPrice * qtyNum);
-    }, 0);
-
-    totalEl.innerText = formatCurrency(cartTotal);
 }

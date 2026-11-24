@@ -1,30 +1,29 @@
 // =========================================================================
 // 1. CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELAS SUAS CHAVES DO FIREBASE CONSOLE)
 // =========================================================================
-const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID"
-};
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-let auth = null;
-let db = null;
-let currentUser = null;
-let unsubscribeFirestore = null;
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTQuDPTAtoCUMxZx2tzOB2TDEr9sCQWCg",
+    authDomain: "controle-financas-9c015.firebaseapp.com",
+    projectId: "controle-financas-9c015",
+    storageBucket: "controle-financas-9c015.firebasestorage.app",
+    messagingSenderId: "317294408562",
+    appId: "1:317294408562:web:f8026e4e126adab0dee3eb",
+    measurementId: "G-RHHFSX6YGQ"
+  };
 
-try {
-    if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "SUA_API_KEY") {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
-    }
-} catch (err) {
-    console.warn("Firebase ainda não configurado com chaves reais:", err);
-}
-
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 // =========================================================================
 // 2. DICIONÁRIO MULTILÍNGUE (PT-BR, EN, JA, ES)
 // =========================================================================

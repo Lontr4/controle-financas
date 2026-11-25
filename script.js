@@ -544,10 +544,10 @@ const initialRooms = [
 ];
 
 const initialShoppingItems = [
-    { id: 101, name: 'Arroz 5kg', roomId: 'room_kitchen', price: 0, checked: false },
-    { id: 102, name: 'Ovos (10 un)', roomId: 'room_kitchen', price: 0, checked: false },
-    { id: 103, name: 'Detergente', roomId: 'room_laundry', price: 0, checked: false },
-    { id: 104, name: 'Papel Higiênico', roomId: 'room_bathroom', price: 0, checked: false }
+    { id: 101, name: 'Arroz 5kg', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 102, name: 'Ovos (10 un)', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 103, name: 'Detergente', roomId: 'room_laundry', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 104, name: 'Papel Higiênico', roomId: 'room_bathroom', qty: 1, price: 0, planned: false, inCart: false }
 ];
 
 let categories = JSON.parse(localStorage.getItem('finc_categories')) || initialCategories;
@@ -760,8 +760,23 @@ function formatCurrency(val, code = currentCurrency) {
 }
 
 // =========================================================================
-// 6. COMPRAS PADRÃO + CÔMODOS DA CASA (TOTALMENTE INTERLIGADOS)
+// 6. COMPRAS PADRÃO + CÔMODOS DA CASA (CHECKLIST -> CARRINHO + QUANTIDADE)
 // =========================================================================
+function normalizeShoppingItem(item) {
+    if (typeof item.inCart === 'undefined') {
+        item.inCart = Boolean(item.checked);
+    }
+    if (typeof item.planned === 'undefined') {
+        item.planned = Boolean(item.checked);
+    }
+    if (!item.qty || item.qty < 1) {
+        item.qty = 1;
+    }
+    return item;
+}
+
+shoppingItems = shoppingItems.map(normalizeShoppingItem);
+
 function setShoppingViewMode(mode) {
     shoppingViewMode = mode;
     localStorage.setItem('finc_shop_view_mode', mode);
@@ -861,15 +876,16 @@ function deleteRoom(roomId) {
     renderShoppingModule();
 }
 
-// Adicionar produto pela Lista Padrão
 function addStandardShoppingItem(e) {
     e.preventDefault();
     const nameEl = document.getElementById('shop-std-name');
     const roomEl = document.getElementById('shop-std-room');
+    const qtyEl = document.getElementById('shop-std-qty');
     const priceEl = document.getElementById('shop-std-price');
 
     const name = nameEl.value.trim();
     const roomId = roomEl.value || (houseRooms[0] && houseRooms[0].id);
+    const qty = Math.max(1, parseInt(qtyEl?.value, 10) || 1);
     const price = parseFloat(priceEl.value) || 0;
 
     if (!name) return;
@@ -878,41 +894,67 @@ function addStandardShoppingItem(e) {
         id: Date.now(),
         name,
         roomId,
+        qty,
         price,
-        checked: price > 0
+        planned: true,
+        inCart: price > 0
     });
 
     nameEl.value = '';
+    if (qtyEl) qtyEl.value = '1';
     priceEl.value = '';
     pushStateToCloud();
     renderShoppingModule();
 }
 
-// Adicionar produto diretamente dentro de um Retângulo de Cômodo
 function addItemToRoom(e, roomId) {
     e.preventDefault();
     const input = document.getElementById(`quick-input-${roomId}`);
+    const qtyInput = document.getElementById(`quick-qty-${roomId}`);
     if (!input) return;
+
     const name = input.value.trim();
+    const qty = Math.max(1, parseInt(qtyInput?.value, 10) || 1);
     if (!name) return;
 
     shoppingItems.push({
         id: Date.now(),
         name,
         roomId,
+        qty,
         price: 0,
-        checked: false
+        planned: true,
+        inCart: false
     });
 
     input.value = '';
+    if (qtyInput) qtyInput.value = '1';
     pushStateToCloud();
     renderShoppingModule();
 }
 
-function toggleShoppingItem(id) {
+function cycleShoppingItemState(id) {
     const item = shoppingItems.find(i => i.id === id);
     if (!item) return;
-    item.checked = !item.checked;
+
+    if (!item.planned && !item.inCart) {
+        item.planned = true;
+    } else if (item.planned && !item.inCart) {
+        item.inCart = true;
+    } else {
+        item.planned = false;
+        item.inCart = false;
+    }
+
+    pushStateToCloud();
+    renderShoppingModule();
+}
+
+function changeShoppingItemQty(id, delta) {
+    const item = shoppingItems.find(i => i.id === id);
+    if (!item) return;
+    const currentQty = Math.max(1, Number(item.qty) || 1);
+    item.qty = Math.max(1, currentQty + delta);
     pushStateToCloud();
     renderShoppingModule();
 }
@@ -924,13 +966,14 @@ function updateShoppingItemPrice(id, val) {
     if (!item) return;
 
     item.price = parseFloat(val) || 0;
-    if (item.price > 0) item.checked = true;
+    if (item.price > 0) {
+        item.planned = true;
+        item.inCart = true;
+    }
 
-    // Atualiza apenas o total no topo sem destruir o input onde você está digitando
     updateShoppingCartTotal();
     saveAllToLocalStorage();
 
-    // Aguarda 800ms após você parar de digitar para enviar para a nuvem
     clearTimeout(priceSaveTimeout);
     priceSaveTimeout = setTimeout(() => {
         pushStateToCloud();
@@ -948,17 +991,28 @@ function updateShoppingCartTotal() {
     if (!totalEl) return;
 
     const total = shoppingItems
-        .filter(i => i.checked)
-        .reduce((sum, i) => sum + Number(i.price || 0), 0);
+        .filter(i => i.inCart)
+        .reduce((sum, i) => sum + (Number(i.price || 0) * Math.max(1, Number(i.qty) || 1)), 0);
 
     totalEl.innerText = formatCurrency(total, currentCurrency);
 }
 
 function renderShoppingModule() {
+    shoppingItems = shoppingItems.map(normalizeShoppingItem);
     populateRoomSelectors();
     updateShoppingCartTotal();
     renderStandardShoppingList();
     renderRoomsGrid();
+}
+
+function getItemStateBadge(item) {
+    if (item.inCart) {
+        return `<span class="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shadow-sm" title="No carrinho"><i class="fa-solid fa-cart-shopping text-[10px]"></i></span>`;
+    }
+    if (item.planned) {
+        return `<span class="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center text-[11px] font-bold shadow-sm" title="Na lista para comprar"><i class="fa-solid fa-clipboard-check text-[10px]"></i></span>`;
+    }
+    return `<span class="w-5 h-5 rounded-md border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 flex items-center justify-center"></span>`;
 }
 
 function renderStandardShoppingList() {
@@ -966,7 +1020,9 @@ function renderStandardShoppingList() {
     if (!container) return;
 
     const t = i18n[currentLang] || i18n['pt-BR'];
-    const visibleItems = shopOnlyChecked ? shoppingItems.filter(i => i.checked) : shoppingItems;
+    const visibleItems = shopOnlyChecked
+        ? shoppingItems.filter(i => i.planned || i.inCart)
+        : shoppingItems;
 
     if (visibleItems.length === 0) {
         container.innerHTML = `<p class="p-6 text-center text-xs text-slate-400 italic">${t.emptyShopList}</p>`;
@@ -975,22 +1031,35 @@ function renderStandardShoppingList() {
 
     container.innerHTML = visibleItems.map(item => {
         const room = houseRooms.find(r => r.id === item.roomId) || { icon: '🏠', name: 'Geral' };
+        const qty = Math.max(1, Number(item.qty) || 1);
+        const rowStyle = item.inCart
+            ? 'bg-emerald-50/60 dark:bg-emerald-900/20'
+            : item.planned
+                ? 'bg-amber-50/50 dark:bg-amber-900/15'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-700/30';
+
         return `
-            <div class="flex items-center justify-between gap-3 p-3.5 transition-colors ${item.checked ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}">
-                <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+            <div class="flex items-center justify-between gap-2 p-3.5 transition-colors ${rowStyle}">
+                <div onclick="cycleShoppingItemState(${item.id})" class="flex items-center gap-3 flex-1 cursor-pointer min-w-0 select-none">
+                    ${getItemStateBadge(item)}
                     <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-semibold truncate ${item.checked ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-800 dark:text-slate-100'}">${item.name}</p>
+                        <p class="text-xs sm:text-sm font-semibold truncate ${item.inCart ? 'line-through text-emerald-700 dark:text-emerald-300' : item.planned ? 'text-amber-800 dark:text-amber-300' : 'text-slate-800 dark:text-slate-100'}">${item.name}</p>
                         <span class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 mt-0.5">
                             ${room.icon} ${room.name}
                         </span>
                     </div>
-                </label>
+                </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <div class="inline-flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <button type="button" onclick="changeShoppingItemQty(${item.id}, -1)" class="px-2 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600">−</button>
+                        <span class="px-1.5 text-xs font-extrabold text-slate-800 dark:text-slate-100 min-w-[20px] text-center">${qty}</span>
+                        <button type="button" onclick="changeShoppingItemQty(${item.id}, 1)" class="px-2 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600">+</button>
+                    </div>
+
                     <input type="number" inputmode="decimal" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
-       oninput="updateShoppingItemPrice(${item.id}, this.value)"
-       class="w-24 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-right font-bold">
+                           oninput="updateShoppingItemPrice(${item.id}, this.value)"
+                           class="w-20 sm:w-24 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-right font-bold">
                     <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 p-1">
                         <i class="fa-solid fa-trash text-xs"></i>
                     </button>
@@ -1007,37 +1076,53 @@ function renderRoomsGrid() {
     const t = i18n[currentLang] || i18n['pt-BR'];
 
     grid.innerHTML = houseRooms.map(room => {
-        const roomItems = shoppingItems.filter(i => i.roomId === room.id && (!shopOnlyChecked || i.checked));
-        const checkedCount = shoppingItems.filter(i => i.roomId === room.id && i.checked).length;
+        const roomItems = shoppingItems.filter(i => i.roomId === room.id && (!shopOnlyChecked || i.planned || i.inCart));
+        const plannedCount = shoppingItems.filter(i => i.roomId === room.id && i.planned && !i.inCart).length;
+        const cartCount = shoppingItems.filter(i => i.roomId === room.id && i.inCart).length;
 
         const itemsHtml = roomItems.length === 0
             ? `<p class="text-[11px] text-slate-400 italic py-3 text-center">${t.emptyRoomItems}</p>`
-            : roomItems.map(item => `
-                <div class="flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-xl border ${item.checked ? 'bg-indigo-50/70 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700'}">
-                    <label class="flex items-center gap-2 flex-1 cursor-pointer min-w-0">
-                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="w-3.5 h-3.5 rounded text-indigo-600">
-                        <span class="text-xs font-medium truncate ${item.checked ? 'font-bold text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}">${item.name}</span>
-                    </label>
-                    <div class="flex items-center gap-1.5">
-                        <input type="number" inputmode="decimal" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
-       oninput="updateShoppingItemPrice(${item.id}, this.value)"
-       class="w-20 px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-[11px] text-right font-bold">
-                        <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-1">
-                            <i class="fa-solid fa-xmark text-xs"></i>
-                        </button>
+            : roomItems.map(item => {
+                const qty = Math.max(1, Number(item.qty) || 1);
+                const cardStyle = item.inCart
+                    ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700'
+                    : item.planned
+                        ? 'bg-amber-50/80 dark:bg-amber-900/25 border-amber-300 dark:border-amber-700'
+                        : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700';
+
+                return `
+                    <div class="flex items-center justify-between gap-1.5 py-1.5 px-2 rounded-xl border ${cardStyle}">
+                        <div onclick="cycleShoppingItemState(${item.id})" class="flex items-center gap-2 flex-1 cursor-pointer min-w-0 select-none">
+                            ${getItemStateBadge(item)}
+                            <span class="text-xs font-medium truncate ${item.inCart ? 'line-through font-bold text-emerald-700 dark:text-emerald-300' : item.planned ? 'font-bold text-amber-800 dark:text-amber-300' : 'text-slate-700 dark:text-slate-200'}">${item.name}</span>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <div class="inline-flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                <button type="button" onclick="changeShoppingItemQty(${item.id}, -1)" class="px-1.5 py-0.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600">−</button>
+                                <span class="px-1 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 min-w-[16px] text-center">${qty}</span>
+                                <button type="button" onclick="changeShoppingItemQty(${item.id}, 1)" class="px-1.5 py-0.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600">+</button>
+                            </div>
+
+                            <input type="number" inputmode="decimal" step="0.01" min="0" value="${item.price || ''}" placeholder="0"
+                                   oninput="updateShoppingItemPrice(${item.id}, this.value)"
+                                   class="w-16 sm:w-20 px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-[11px] text-right font-bold">
+                            <button onclick="deleteShoppingItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-1">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
         return `
             <div class="bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200/90 dark:border-slate-700 shadow-sm flex flex-col justify-between overflow-hidden">
-                <!-- Cabeçalho do Retângulo do Cômodo -->
-                <div class="px-4 py-3 bg-slate-50 dark:bg-slate-700/40 border-b border-slate-200/70 dark:border-slate-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
+                <div class="px-4 py-3 bg-slate-50 dark:bg-slate-700/40 border-b border-slate-200/70 dark:border-slate-700 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-lg">${room.icon}</span>
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white">${room.name}</h3>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
-                            ${checkedCount} no carrinho
+                        ${plannedCount > 0 ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">📋 ${plannedCount} faltam</span>` : ''}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+                            🛒 ${cartCount}
                         </span>
                     </div>
                     <div class="flex items-center gap-1">
@@ -1050,14 +1135,13 @@ function renderRoomsGrid() {
                     </div>
                 </div>
 
-                <!-- Lista de Produtos dentro do Retângulo -->
                 <div class="p-3.5 space-y-2 flex-1 max-h-64 overflow-y-auto">
                     ${itemsHtml}
                 </div>
 
-                <!-- Campo Rápido para Adicionar Produto neste Cômodo -->
                 <form onsubmit="addItemToRoom(event, '${room.id}')" class="p-2.5 bg-slate-50/70 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-700 flex gap-1.5">
-                    <input type="text" id="quick-input-${room.id}" placeholder="${t.quickAddPlaceholder}" class="flex-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+                    <input type="text" id="quick-input-${room.id}" placeholder="${t.quickAddPlaceholder}" class="flex-1 min-w-0 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+                    <input type="number" inputmode="numeric" id="quick-qty-${room.id}" min="1" value="1" title="Quantidade" class="w-12 px-1.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-center font-bold">
                     <button type="submit" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -1068,39 +1152,43 @@ function renderRoomsGrid() {
 }
 
 function checkoutShoppingList() {
-    const checkedItems = shoppingItems.filter(i => i.checked);
-    if (checkedItems.length === 0) {
-        alert("Marque pelo menos um item no carrinho antes de concluir.");
+    const cartItems = shoppingItems.filter(i => i.inCart);
+    if (cartItems.length === 0) {
+        alert("Coloque pelo menos um item no carrinho (ícone verde) antes de concluir.");
         return;
     }
 
-    const total = checkedItems.reduce((sum, i) => sum + Number(i.price || 0), 0);
+    const total = cartItems.reduce((sum, i) => sum + (Number(i.price || 0) * Math.max(1, Number(i.qty) || 1)), 0);
     if (total <= 0) {
-        alert("Informe o valor dos produtos marcados para lançar a despesa.");
+        alert("Informe o valor dos produtos no carrinho para lançar a despesa.");
         return;
     }
 
-    const itemsSummary = checkedItems.map(i => i.name).join(', ');
+    const itemsSummary = cartItems.map(i => {
+        const qty = Math.max(1, Number(i.qty) || 1);
+        return qty > 1 ? `${qty}x ${i.name}` : i.name;
+    }).join(', ');
     const todayStr = new Date().toISOString().split('T')[0];
 
     transactions.push({
         id: Date.now(),
-        description: `Compras (${checkedItems.length} itens)`,
+        description: `Compras (${cartItems.length} itens)`,
         amount: total,
         currency: currentCurrency,
         date: todayStr,
-        categoryId: 8, // Alimentação
+        categoryId: 8,
         paymentMethodId: 1,
         status: 'paid',
         isRecurring: false,
         notes: itemsSummary
     });
 
-    // Desmarca os itens comprados e zera os preços para a próxima ida ao mercado (mantendo o catálogo dos cômodos!)
     shoppingItems.forEach(item => {
-        if (item.checked) {
-            item.checked = false;
+        if (item.inCart) {
+            item.inCart = false;
+            item.planned = false;
             item.price = 0;
+            item.qty = 1;
         }
     });
 

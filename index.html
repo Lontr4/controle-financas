@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full">
+<html lang="ja" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Finanças - Gestão Financeira Pessoal</title>
+    <title>家計簿管理システム - 個人財務管理</title>
     
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,19 +37,19 @@
                     <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md flex-shrink-0">
                         <i class="fa-solid fa-wallet text-lg"></i>
                     </div>
-                    <h1 id="app-title" class="font-bold text-base sm:text-lg leading-tight text-slate-900 dark:text-white truncate">Controle de Finanças</h1>
+                    <h1 id="app-title" class="font-bold text-base sm:text-lg leading-tight text-slate-900 dark:text-white truncate">家計簿管理システム</h1>
                 </div>
 
                 <!-- Navigation Tabs (Desktop) -->
                 <nav class="hidden lg:flex space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1.5 rounded-2xl shadow-inner">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-indigo-600 bg-white dark:bg-slate-800 shadow-sm dark:text-white">
-                        <i class="fa-solid fa-chart-pie mr-1.5"></i><span id="lbl-nav-dash">Painel</span>
+                        <i class="fa-solid fa-chart-pie mr-1.5"></i><span id="lbl-nav-dash">ダッシュボード</span>
                     </button>
                     <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
-                        <i class="fa-solid fa-list-check mr-1.5"></i><span id="lbl-nav-tx">Transações</span>
+                        <i class="fa-solid fa-list-check mr-1.5"></i><span id="lbl-nav-tx">取引履歴</span>
                     </button>
                     <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-medium transition-all text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60">
-                        <i class="fa-solid fa-cart-shopping mr-1.5"></i><span id="lbl-nav-shop">Compras</span>
+                        <i class="fa-solid fa-cart-shopping mr-1.5"></i><span id="lbl-nav-shop">買い物リスト</span>
                     </button>
                 </nav>
 
@@ -59,12 +59,16 @@
                     <!-- Seletor de Idioma -->
                     <div class="relative inline-block text-left" id="dropdown-lang-container">
                         <button onclick="toggleLangDropdown()" type="button" class="h-9 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold px-2.5 rounded-xl border border-slate-200 dark:border-slate-600 transition-all shadow-sm">
-                            <img id="current-lang-flag" src="https://flagcdn.com/w20/br.png" alt="Bandeira" class="w-4 h-3 rounded-sm object-cover">
-                            <span id="current-lang-label">PT</span>
+                            <img id="current-lang-flag" src="https://flagcdn.com/w20/jp.png" alt="Bandeira" class="w-4 h-3 rounded-sm object-cover">
+                            <span id="current-lang-label">JA</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                         </button>
 
                         <div id="lang-dropdown-menu" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 py-1.5 transition-all">
+                            <button onclick="selectLanguage('ja')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
+                                <img src="https://flagcdn.com/w20/jp.png" alt="Japan" class="w-4 h-3 rounded-sm object-cover">
+                                <span>日本語</span>
+                            </button>
                             <button onclick="selectLanguage('pt-BR')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/br.png" alt="Brasil" class="w-4 h-3 rounded-sm object-cover">
                                 <span>Português</span>
@@ -72,10 +76,6 @@
                             <button onclick="selectLanguage('en')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/us.png" alt="USA" class="w-4 h-3 rounded-sm object-cover">
                                 <span>English</span>
-                            </button>
-                            <button onclick="selectLanguage('ja')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
-                                <img src="https://flagcdn.com/w20/jp.png" alt="Japan" class="w-4 h-3 rounded-sm object-cover">
-                                <span>日本語</span>
                             </button>
                             <button onclick="selectLanguage('es')" class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                                 <img src="https://flagcdn.com/w20/es.png" alt="Spain" class="w-4 h-3 rounded-sm object-cover">
@@ -85,19 +85,19 @@
                     </div>
 
                     <!-- Botão Gerenciar Metas -->
-                    <button onclick="openModal('modal-target')" title="Gerenciar Metas" class="hidden md:flex h-9 items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="openModal('modal-target')" title="目標管理" class="hidden md:flex h-9 items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-bullseye"></i>
-                        <span id="btn-metas-lbl">Metas</span>
+                        <span id="btn-metas-lbl">目標管理</span>
                     </button>
 
                     <!-- Exportar PDF -->
-                    <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="hidden xl:flex h-9 items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="exportToPDF()" title="PDF出力" class="hidden xl:flex h-9 items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-file-pdf"></i>
                         <span>PDF</span>
                     </button>
 
                     <!-- Enviar por E-mail -->
-                    <button onclick="sendByEmail()" title="Enviar Resumo por E-mail" class="hidden xl:flex h-9 items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="sendByEmail()" title="メール送信" class="hidden xl:flex h-9 items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-envelope"></i>
                         <span>E-mail</span>
                     </button>
@@ -105,22 +105,22 @@
                     <!-- Nova Transação -->
                     <button onclick="openModal('modal-transaction')" class="hidden sm:flex h-9 items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <i class="fa-solid fa-plus"></i>
-                        <span id="lbl-btn-new-tx">Nova Transação</span>
+                        <span id="lbl-btn-new-tx">新規取引追加</span>
                     </button>
 
                     <!-- Botão Login Google / Perfil -->
-                    <button onclick="handleGoogleAuth()" id="btn-google-auth" title="Sincronizar com Conta Google" class="h-9 flex items-center gap-1.5 whitespace-nowrap bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-slate-600 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
+                    <button onclick="handleGoogleAuth()" id="btn-google-auth" title="Googleアカウント連携" class="h-9 flex items-center gap-1.5 whitespace-nowrap bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-slate-600 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95">
                         <img id="google-user-avatar" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4 rounded-full object-cover">
-                        <span id="lbl-google-auth" class="hidden sm:inline">Entrar</span>
+                        <span id="lbl-google-auth" class="hidden sm:inline">ログイン</span>
                     </button>
 
                     <!-- Botão de Definições -->
-                    <button onclick="openModal('modal-settings')" title="Definições e Backup" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
+                    <button onclick="openModal('modal-settings')" title="設定とバックアップ" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
                         <i class="fa-solid fa-gear text-sm"></i>
                     </button>
 
                     <!-- Botão Dark Mode -->
-                    <button onclick="toggleDarkMode()" id="btn-theme" title="Alternar Tema" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
+                    <button onclick="toggleDarkMode()" id="btn-theme" title="テーマ切替" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all">
                         <i class="fa-solid fa-moon text-sm"></i>
                     </button>
                 </div>
@@ -130,13 +130,13 @@
         <!-- Barra de Navegação Mobile/Tablet -->
         <div class="lg:hidden border-t border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/90 px-3 py-1.5 flex items-center justify-between gap-1.5">
             <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
-                <i class="fa-solid fa-chart-pie mr-1"></i><span>Painel</span>
+                <i class="fa-solid fa-chart-pie mr-1"></i><span>ダッシュボード</span>
             </button>
             <button onclick="switchTab('transactions')" id="mob-nav-transactions" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300">
-                <i class="fa-solid fa-list-check mr-1"></i><span>Extrato</span>
+                <i class="fa-solid fa-list-check mr-1"></i><span>取引履歴</span>
             </button>
             <button onclick="switchTab('shopping')" id="mob-nav-shopping" class="mob-nav-btn flex-1 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300">
-                <i class="fa-solid fa-cart-shopping mr-1"></i><span>Compras</span>
+                <i class="fa-solid fa-cart-shopping mr-1"></i><span>買い物リスト</span>
             </button>
             <button onclick="openModal('modal-transaction')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm">
                 <i class="fa-solid fa-plus"></i>
@@ -154,7 +154,7 @@
             <div class="flex flex-wrap items-center gap-2 py-1">
                 <div class="flex items-center gap-1 text-xs font-bold text-slate-500 mr-2">
                     <i class="fa-solid fa-coins text-amber-500"></i>
-                    <span id="lbl-wallet-title">Carteira:</span>
+                    <span id="lbl-wallet-title">通貨:</span>
                 </div>
 
                 <div id="active-currencies-cards" class="flex flex-wrap items-center gap-2"></div>
@@ -163,24 +163,24 @@
                     <button onclick="toggleAddCurrencyDropdown()" type="button" 
                             class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600 transition-all active:scale-95 shadow-sm">
                         <i class="fa-solid fa-plus text-[10px]"></i>
-                        <span id="btn-add-currency-lbl">Moeda</span>
+                        <span id="btn-add-currency-lbl">通貨追加</span>
                     </button>
 
                     <div id="add-currency-menu" class="hidden absolute left-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 py-2">
                         <button onclick="activateCurrency('JPY')" class="flex items-center justify-between w-full px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
-                            <span>🇯🇵 Iene Japonês</span>
+                            <span>🇯🇵 日本円</span>
                             <span class="font-bold">JPY (¥)</span>
                         </button>
                         <button onclick="activateCurrency('BRL')" class="flex items-center justify-between w-full px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
-                            <span>🇧🇷 Real Brasileiro</span>
+                            <span>🇧🇷 ブラジルレアル</span>
                             <span class="font-bold">BRL (R$)</span>
                         </button>
                         <button onclick="activateCurrency('USD')" class="flex items-center justify-between w-full px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
-                            <span>🇺🇸 Dólar Americano</span>
+                            <span>🇺🇸 米ドル</span>
                             <span class="font-bold">USD ($)</span>
                         </button>
                         <button onclick="activateCurrency('EUR')" class="flex items-center justify-between w-full px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
-                            <span>🇪🇺 Euro</span>
+                            <span>🇪🇺 ユーロ</span>
                             <span class="font-bold">EUR (€)</span>
                         </button>
                     </div>
@@ -190,13 +190,13 @@
             <!-- FILTRO DE MÊS -->
             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                    <h2 id="lbl-summary-title" class="font-bold text-slate-900 dark:text-white text-base">Resumo Financeiro</h2>
-                    <p id="lbl-summary-sub" class="text-xs text-slate-500 dark:text-slate-400">Selecione o mês para filtrar as métricas e o gráfico</p>
+                    <h2 id="lbl-summary-title" class="font-bold text-slate-900 dark:text-white text-base">財務概要</h2>
+                    <p id="lbl-summary-sub" class="text-xs text-slate-500 dark:text-slate-400">月を選択して指標とグラフを絞り込みます</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <label for="dash-month-filter" class="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap"><i class="fa-regular fa-calendar-check mr-1"></i><span id="lbl-filter-month">Mês:</span></label>
+                    <label for="dash-month-filter" class="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap"><i class="fa-regular fa-calendar-check mr-1"></i><span id="lbl-filter-month">対象月:</span></label>
                     <select id="dash-month-filter" onchange="renderDashboard()" class="w-full sm:w-auto px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="ALL">Todos os Meses</option>
+                        <option value="ALL">すべての月</option>
                     </select>
                 </div>
             </div>
@@ -207,21 +207,21 @@
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
-                    <p id="lbl-card-balance" class="text-xs uppercase tracking-wider font-semibold text-slate-400">Saldo Total</p>
+                    <p id="lbl-card-balance" class="text-xs uppercase tracking-wider font-semibold text-slate-400">総収支残高</p>
                     <h3 id="card-balance" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">¥ 0</h3>
-                    <span id="balance-status-badge" class="mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Balanço Positivo</span>
+                    <span id="balance-status-badge" class="mt-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">黒字バランス</span>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
-                    <p id="lbl-card-income" class="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">Total Receitas</p>
+                    <p id="lbl-card-income" class="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">総収入</p>
                     <h3 id="card-income" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">¥ 0</h3>
-                    <p id="lbl-sub-income" class="mt-3 text-xs text-slate-500 dark:text-slate-400">Entradas do período</p>
+                    <p id="lbl-sub-income" class="mt-3 text-xs text-slate-500 dark:text-slate-400">期間内の収入</p>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
-                    <p id="lbl-card-expense" class="text-xs uppercase tracking-wider font-semibold text-rose-600 dark:text-rose-400">Total Despesas</p>
+                    <p id="lbl-card-expense" class="text-xs uppercase tracking-wider font-semibold text-rose-600 dark:text-rose-400">総支出</p>
                     <h3 id="card-expense" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">¥ 0</h3>
-                    <p id="lbl-sub-expense" class="mt-3 text-xs text-slate-500 dark:text-slate-400">Saídas do período</p>
+                    <p id="lbl-sub-expense" class="mt-3 text-xs text-slate-500 dark:text-slate-400">期間内の支出</p>
                 </div>
             </div>
 
@@ -229,9 +229,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                     <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
-                        <h2 id="lbl-chart-title" class="font-bold text-slate-900 dark:text-white text-base">Gastos por Categoria</h2>
+                        <h2 id="lbl-chart-title" class="font-bold text-slate-900 dark:text-white text-base">カテゴリ別支出</h2>
                         <span id="chart-period-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
-                            Visão Geral
+                            全体概要 (すべての月)
                         </span>
                     </div>
 
@@ -242,7 +242,7 @@
 
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex flex-col justify-between">
                     <div>
-                        <h2 id="lbl-recent-tx" class="font-bold text-slate-900 dark:text-white text-base mb-4">Últimas Transações</h2>
+                        <h2 id="lbl-recent-tx" class="font-bold text-slate-900 dark:text-white text-base mb-4">最近の取引履歴</h2>
                         <div id="recent-transactions-list" class="space-y-3"></div>
                     </div>
                 </div>
@@ -253,16 +253,16 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
                         <h2 id="lbl-annual-chart-title" class="font-bold text-slate-900 dark:text-white text-base">
-                            Comparativo Anual de Gastos (Jan - Dez)
+                            年間支出比較（月別推移）
                         </h2>
                         <p id="lbl-annual-chart-sub" class="text-xs text-slate-500 dark:text-slate-400">
-                            Evolução mensal de despesas e receitas ao longo do ano
+                            1年間の月別支出と収入の推移
                         </p>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <label for="annual-year-filter" class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            <i class="fa-regular fa-calendar mr-1"></i><span id="lbl-filter-year">Ano:</span>
+                            <i class="fa-regular fa-calendar mr-1"></i><span id="lbl-filter-year">対象年:</span>
                         </label>
                         <select id="annual-year-filter" onchange="renderAnnualChart()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         </select>
@@ -280,39 +280,39 @@
             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 id="lbl-tx-table-title" class="font-bold text-lg text-slate-900 dark:text-white">Extrato Detalhado</h2>
-                        <p id="lbl-tx-table-sub" class="text-xs text-slate-500 dark:text-slate-400">Relação completa de transações da moeda selecionada</p>
+                        <h2 id="lbl-tx-table-title" class="font-bold text-lg text-slate-900 dark:text-white">取引明細</h2>
+                        <p id="lbl-tx-table-sub" class="text-xs text-slate-500 dark:text-slate-400">選択した通貨の取引データ一覧</p>
                     </div>
                     <button onclick="openModal('modal-transaction')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-2xl text-sm font-medium transition shadow-sm">
-                        <i class="fa-solid fa-plus mr-1"></i> <span class="lbl-btn-new-tx-sub">Nova Transação</span>
+                        <i class="fa-solid fa-plus mr-1"></i> <span class="lbl-btn-new-tx-sub">新規取引追加</span>
                     </button>
                 </div>
 
                 <!-- BARRA DE FILTROS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
                     <div class="lg:col-span-2">
-                        <input type="text" id="tx-search-input" oninput="renderTransactionsTable()" placeholder="Pesquisar por descrição ou obs..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                        <input type="text" id="tx-search-input" oninput="renderTransactionsTable()" placeholder="摘要やメモで検索..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     </div>
                     <div>
                         <select id="tx-filter-category" onchange="renderTransactionsTable()" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-                            <option value="ALL">Todas as Categorias</option>
+                            <option value="ALL">すべてのカテゴリ</option>
                         </select>
                     </div>
                     <div>
                         <select id="tx-filter-method" onchange="renderTransactionsTable()" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-                            <option value="ALL">Todos os Métodos</option>
+                            <option value="ALL">すべての決済方法</option>
                         </select>
                     </div>
                     <div>
                         <select id="tx-filter-status" onchange="renderTransactionsTable()" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium">
-                            <option value="ALL">Todos os Status</option>
-                            <option value="paid">✅ Pagos</option>
-                            <option value="pending">⏳ Pendentes</option>
+                            <option value="ALL">すべてのステータス</option>
+                            <option value="paid">✅ 支払済</option>
+                            <option value="pending">⏳ 保留中</option>
                         </select>
                     </div>
                     <div class="flex gap-1.5">
-                        <input type="date" id="tx-filter-date-start" onchange="renderTransactionsTable()" title="Data Inicial" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
-                        <input type="date" id="tx-filter-date-end" onchange="renderTransactionsTable()" title="Data Final" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
+                        <input type="date" id="tx-filter-date-start" onchange="renderTransactionsTable()" title="開始日" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
+                        <input type="date" id="tx-filter-date-end" onchange="renderTransactionsTable()" title="終了日" class="w-1/2 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px]">
                     </div>
                 </div>
             </div>
@@ -322,14 +322,14 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs text-slate-500 uppercase">
-                                <th id="th-date" class="p-4">Data</th>
-                                <th id="th-desc" class="p-4">Descrição</th>
-                                <th id="th-cat" class="p-4">Categoria</th>
-                                <th id="th-method" class="p-4">Método</th>
-                                <th id="th-amount" class="p-4 text-right">Valor</th>
-                                <th id="th-status" class="p-4 text-center">Status</th>
-                                <th id="th-notes" class="p-4 text-center">Obs. / Link</th>
-                                <th id="th-actions" class="p-4 text-center">Ações</th>
+                                <th id="th-date" class="p-4">日付</th>
+                                <th id="th-desc" class="p-4">摘要</th>
+                                <th id="th-cat" class="p-4">カテゴリ</th>
+                                <th id="th-method" class="p-4">決済方法</th>
+                                <th id="th-amount" class="p-4 text-right">金額</th>
+                                <th id="th-status" class="p-4 text-center">ステータス</th>
+                                <th id="th-notes" class="p-4 text-center">メモ / リンク</th>
+                                <th id="th-actions" class="p-4 text-center">操作</th>
                             </tr>
                         </thead>
                         <tbody id="transactions-table-body" class="divide-y divide-slate-100 dark:divide-slate-700/60 text-sm"></tbody>
@@ -347,22 +347,22 @@
                     <div>
                         <h2 id="lbl-shop-title" class="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping text-indigo-600"></i>
-                            <span>Lista de Compras & Cômodos</span>
+                            <span>買い物リスト＆部屋別管理</span>
                         </h2>
                         <p id="lbl-shop-sub" class="text-xs text-slate-500 dark:text-slate-400">
-                            Gerencie na lista padrão ou organize por cômodos da casa — ambos sincronizam o mesmo carrinho
+                            標準リストまたは家の部屋別カードで管理でき、カート内容は自動で連動します
                         </p>
                     </div>
 
                     <!-- Resumo e Concluir -->
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end bg-slate-50 dark:bg-slate-900/60 px-4 py-2.5 rounded-2xl border border-slate-200/70 dark:border-slate-700">
                         <div>
-                            <span id="lbl-shop-cart-total" class="text-[11px] uppercase font-bold text-slate-400 block">Total no Carrinho</span>
+                            <span id="lbl-shop-cart-total" class="text-[11px] uppercase font-bold text-slate-400 block">カート合計金額</span>
                             <span id="shopping-cart-total" class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">¥ 0</span>
                         </div>
                         <button onclick="checkoutShoppingList()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
                             <i class="fa-solid fa-check-double"></i>
-                            <span id="lbl-btn-checkout">Concluir e Lançar Gasto</span>
+                            <span id="lbl-btn-checkout">完了して支出に登録</span>
                         </button>
                     </div>
                 </div>
@@ -371,16 +371,16 @@
                 <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
                     <div class="inline-flex bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl">
                         <button onclick="setShoppingViewMode('standard')" id="btn-shop-mode-standard" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm">
-                            <i class="fa-solid fa-list-ul mr-1.5"></i><span id="lbl-mode-standard">Lista Padrão</span>
+                            <i class="fa-solid fa-list-ul mr-1.5"></i><span id="lbl-mode-standard">標準リスト</span>
                         </button>
                         <button onclick="setShoppingViewMode('rooms')" id="btn-shop-mode-rooms" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-600 dark:text-slate-300">
-                            <i class="fa-solid fa-house-chimney mr-1.5"></i><span id="lbl-mode-rooms">Por Cômodos (Extra)</span>
+                            <i class="fa-solid fa-house-chimney mr-1.5"></i><span id="lbl-mode-rooms">部屋別表示 (拡張)</span>
                         </button>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <button onclick="toggleOnlyCheckedFilter()" id="btn-filter-only-checked" class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition">
-                            <i class="fa-regular fa-square-check mr-1"></i><span id="lbl-filter-checked">Mostrar só marcados</span>
+                            <i class="fa-regular fa-square-check mr-1"></i><span id="lbl-filter-checked">チェック済のみ表示</span>
                         </button>
                     </div>
                 </div>
@@ -391,20 +391,20 @@
                 <!-- Formulário de Adição Padrão -->
                 <form onsubmit="addStandardShoppingItem(event)" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                     <div class="sm:col-span-4">
-                        <input type="text" id="shop-std-name" required placeholder="Nome do produto (ex: Arroz, Leite...)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                        <input type="text" id="shop-std-name" required placeholder="商品名 (例: お米、牛乳...)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     </div>
                     <div class="sm:col-span-3">
                         <select id="shop-std-room" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium"></select>
                     </div>
                     <div class="sm:col-span-1">
-                        <input type="number" inputmode="numeric" min="1" value="1" id="shop-std-qty" title="Quantidade" placeholder="Qtd" class="w-full px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-center font-bold">
+                        <input type="number" inputmode="numeric" min="1" value="1" id="shop-std-qty" title="数量" placeholder="数量" class="w-full px-2 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-center font-bold">
                     </div>
                     <div class="sm:col-span-2">
-                        <input type="number" inputmode="decimal" step="0.01" min="0" id="shop-std-price" placeholder="Preço un." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                        <input type="number" inputmode="decimal" step="1" min="0" id="shop-std-price" placeholder="単価 (¥)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     </div>
                     <div class="sm:col-span-2">
                         <button type="submit" class="w-full h-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                            <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-add-item">Adicionar</span>
+                            <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-add-item">追加</span>
                         </button>
                     </div>
                 </form>
@@ -420,12 +420,12 @@
                 <form onsubmit="createNewRoom(event)" class="bg-indigo-50/70 dark:bg-indigo-950/30 p-4 rounded-2xl border border-indigo-200/70 dark:border-indigo-800/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                     <div class="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 whitespace-nowrap">
                         <i class="fa-solid fa-door-open text-sm"></i>
-                        <span id="lbl-create-room-title">Criar Novo Cômodo:</span>
+                        <span id="lbl-create-room-title">新しい部屋を作成:</span>
                     </div>
                     <input type="text" id="new-room-icon" maxlength="4" placeholder="🏠" value="🏠" class="w-14 text-center px-2 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                    <input type="text" id="new-room-name" required placeholder="Ex: Cozinha, Varanda, Escritório, Garagem..." class="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    <input type="text" id="new-room-name" required placeholder="例: キッチン、ベランダ、書斎、ガレージ..." class="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-create-room">Criar Cômodo</span>
+                        <i class="fa-solid fa-plus mr-1"></i> <span id="lbl-btn-create-room">部屋を追加</span>
                     </button>
                 </form>
 
@@ -442,7 +442,7 @@
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[92vh]">
             
             <div class="flex justify-between items-center px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
-                <h3 id="modal-tx-title" class="font-bold text-slate-900 dark:text-white text-base">Adicionar Transação</h3>
+                <h3 id="modal-tx-title" class="font-bold text-slate-900 dark:text-white text-base">取引の登録</h3>
                 <button onclick="closeModal('modal-transaction')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
@@ -450,7 +450,7 @@
                 <input type="hidden" id="tx-id">
                 
                 <div>
-                    <label id="lbl-form-currency" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Moeda da Transação</label>
+                    <label id="lbl-form-currency" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">取引通貨</label>
                     <select id="tx-currency" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold">
                         <option value="JPY">🇯🇵 JPY (¥)</option>
                         <option value="BRL">🇧🇷 BRL (R$)</option>
@@ -460,62 +460,62 @@
                 </div>
 
                 <div>
-                    <label id="lbl-form-desc" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Descrição</label>
-                    <input type="text" id="tx-desc" required placeholder="Ex: Mercado, Salário..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    <label id="lbl-form-desc" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">内容・摘要</label>
+                    <input type="text" id="tx-desc" required placeholder="例: スーパー、給与..." class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label id="lbl-form-amount" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Valor</label>
+                        <label id="lbl-form-amount" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">金額</label>
                         <input type="number" step="0.01" min="0.01" id="tx-amount" required placeholder="1000" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     </div>
                     <div>
-                        <label id="lbl-form-date" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Data</label>
+                        <label id="lbl-form-date" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">日付</label>
                         <input type="date" id="tx-date" required class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label id="lbl-form-cat" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Categoria</label>
+                        <label id="lbl-form-cat" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">カテゴリ</label>
                         <select id="tx-category" required class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm"></select>
                     </div>
                     <div>
-                        <label id="lbl-form-method" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Método</label>
+                        <label id="lbl-form-method" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">決済方法</label>
                         <select id="tx-method" required class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm"></select>
                     </div>
                 </div>
 
                 <div>
-                    <label id="lbl-form-status" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Status do Pagamento</label>
+                    <label id="lbl-form-status" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">支払い状態</label>
                     <select id="tx-status" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold">
-                        <option value="paid">✅ Pago / Concluído</option>
-                        <option value="pending">⏳ Pendente</option>
+                        <option value="paid">✅ 支払済 / 完了</option>
+                        <option value="pending">⏳ 保留中</option>
                     </select>
                 </div>
 
                 <label class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer pt-1">
                     <input type="checkbox" id="tx-is-recurring" class="rounded text-indigo-600 focus:ring-indigo-500">
-                    <span id="lbl-form-recurring">Repetir mensalmente (Despesa / Receita Fixa)</span>
+                    <span id="lbl-form-recurring">毎月繰り返し設定（固定費・固定収入）</span>
                 </label>
 
                 <div>
-                    <label id="lbl-form-notes" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Observações / Link de Pagamento</label>
-                    <input type="text" id="tx-notes" placeholder="Ex: https://link-pagamento.com" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
+                    <label id="lbl-form-notes" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">メモ / リンク</label>
+                    <input type="text" id="tx-notes" placeholder="例: https://link-pagamento.com" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
                 </div>
                 
                 <div class="pt-2 border-t border-slate-100 dark:border-slate-700">
                     <label id="lbl-assign-target-opt" class="block text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">
-                        <i class="fa-solid fa-bullseye mr-1"></i> Alocar valor para uma Meta? (Opcional)
+                        <i class="fa-solid fa-bullseye mr-1"></i> 目標に資金を割り当てますか？ (任意)
                     </label>
                     <select id="tx-target-assign" class="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm">
-                        <option value="">Nenhuma meta (Apenas movimentação)</option>
+                        <option value="">割り当てなし (通常の取引のみ)</option>
                     </select>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700">
-                    <button type="button" onclick="closeModal('modal-transaction')" id="btn-cancel" class="px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl">Cancelar</button>
-                    <button type="submit" id="btn-save" class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">Salvar</button>
+                    <button type="button" onclick="closeModal('modal-transaction')" id="btn-cancel" class="px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl">キャンセル</button>
+                    <button type="submit" id="btn-save" class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">保存する</button>
                 </div>
             </form>
         </div>
@@ -526,46 +526,46 @@
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div>
-                    <h3 id="modal-targets-manage-title" class="font-bold text-slate-900 dark:text-white text-base">Gerenciar Metas Financeiras</h3>
-                    <p id="modal-targets-manage-sub" class="text-xs text-slate-500 dark:text-slate-400">As metas são separadas por moeda.</p>
+                    <h3 id="modal-targets-manage-title" class="font-bold text-slate-900 dark:text-white text-base">貯金目標の管理</h3>
+                    <p id="modal-targets-manage-sub" class="text-xs text-slate-500 dark:text-slate-400">目標は通貨ごとに分かれています。</p>
                 </div>
                 <button onclick="closeModal('modal-target')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
             <form onsubmit="saveNewTarget(event)" class="space-y-3 mb-6 bg-slate-50 dark:bg-slate-700/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700">
-                <h4 id="lbl-add-new-target" class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Adicionar Nova Meta</h4>
+                <h4 id="lbl-add-new-target" class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">新しい目標を追加</h4>
                 <div>
-                    <label id="lbl-target-name-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Nome da Meta</label>
-                    <input type="text" id="target-name" required placeholder="Ex: Reserva, Viagem..." class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    <label id="lbl-target-name-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">目標名</label>
+                    <input type="text" id="target-name" required placeholder="例: 予備費、旅行..." class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                 </div>
                 
                 <div class="grid grid-cols-3 gap-2">
                     <div>
-                        <label id="lbl-target-amount-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Valor Alvo</label>
+                        <label id="lbl-target-amount-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">目標金額</label>
                         <input type="number" id="target-amount" min="1" required placeholder="150000" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label id="lbl-target-saved-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Já Guardado</label>
+                        <label id="lbl-target-saved-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">現在の積立額</label>
                         <input type="number" id="target-saved" min="0" placeholder="0" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label id="lbl-target-date-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Data Limite</label>
+                        <label id="lbl-target-date-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">達成期限</label>
                         <input type="date" id="target-date" required class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                     </div>
                 </div>
 
                 <button type="submit" id="btn-add-target" class="w-full mt-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                    <i class="fa-solid fa-plus mr-1"></i> <span id="btn-add-target-text">Salvar Meta</span>
+                    <i class="fa-solid fa-plus mr-1"></i> <span id="btn-add-target-text">目標を保存</span>
                 </button>
             </form>
 
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2"><span id="lbl-active-targets-title">Metas Ativas</span> (<span id="target-count">0</span>/3)</h4>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2"><span id="lbl-active-targets-title">有効な目標</span> (<span id="target-count">0</span>/3)</h4>
                 <div id="modal-targets-list" class="space-y-2"></div>
             </div>
 
             <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700 mt-4">
-                <button type="button" onclick="closeModal('modal-target')" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300">Fechar</button>
+                <button type="button" onclick="closeModal('modal-target')" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300">閉じる</button>
             </div>
         </div>
     </div>
@@ -574,19 +574,19 @@
     <div id="modal-deposit" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden p-5">
             <div class="flex justify-between items-center mb-3">
-                <h3 id="modal-deposit-title" class="font-bold text-slate-900 dark:text-white text-sm">Depositar na Meta</h3>
+                <h3 id="modal-deposit-title" class="font-bold text-slate-900 dark:text-white text-sm">目標へ入金</h3>
                 <button onclick="closeModal('modal-deposit')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <form onsubmit="submitDeposit(event)" class="space-y-3">
                 <input type="hidden" id="deposit-target-id">
                 <div>
-                    <label id="lbl-deposit-amount-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Valor a Guardar / Depositar</label>
-                    <input type="number" id="deposit-amount" min="1" required placeholder="Ex: 5000" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold">
+                    <label id="lbl-deposit-amount-input" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">積立・入金金額</label>
+                    <input type="number" id="deposit-amount" min="1" required placeholder="例: 5000" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold">
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('modal-deposit')" class="px-3 py-1.5 text-xs text-slate-500">Cancelar</button>
-                    <button type="submit" id="btn-deposit-confirm" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">Confirmar Depósito</button>
+                    <button type="button" onclick="closeModal('modal-deposit')" class="px-3 py-1.5 text-xs text-slate-500">キャンセル</button>
+                    <button type="submit" id="btn-deposit-confirm" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">入金を確定</button>
                 </div>
             </form>
         </div>
@@ -597,8 +597,8 @@
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden p-6 space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div>
-                    <h3 id="modal-settings-title" class="font-bold text-slate-900 dark:text-white text-base">Definições e Cópia de Segurança</h3>
-                    <p id="modal-settings-sub" class="text-xs text-slate-500 dark:text-slate-400">Gerencie a segurança dos seus dados locais e na nuvem</p>
+                    <h3 id="modal-settings-title" class="font-bold text-slate-900 dark:text-white text-base">設定とバックアップ</h3>
+                    <p id="modal-settings-sub" class="text-xs text-slate-500 dark:text-slate-400">ローカルとクラウドのデータ管理</p>
                 </div>
                 <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -606,26 +606,26 @@
             <!-- NOTAS DE ATUALIZAÇÃO -->
             <div class="space-y-2 bg-indigo-50/60 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-bullhorn"></i> <span id="lbl-changelog-title">Notas de Atualização (v3.0)</span>
+                    <i class="fa-solid fa-bullhorn"></i> <span id="lbl-changelog-title">アップデート情報 (v3.0)</span>
                 </h4>
                 <ul id="changelog-list" class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-disc pl-4 pt-1">
-                    <li><strong>Compras por Cômodos:</strong> Crie retângulos personalizados para cada ambiente da casa interligados com a lista padrão.</li>
-                    <li><strong>Sincronização Cloud:</strong> Login com Google e atualização em tempo real entre PC e celular.</li>
-                    <li><strong>Gestão Multimoedas:</strong> Suporte para JPY, BRL, USD e EUR com metas independentes.</li>
+                    <li><strong>部屋別買い物リスト:</strong> 家の部屋ごとにカードを作成し、標準リストとリアルタイム連動。</li>
+                    <li><strong>クラウド同期:</strong> GoogleログインでPCとスマホ間でリアルタイム同期。</li>
+                    <li><strong>マルチ通貨管理:</strong> JPY、BRL、USD、EURに対応し通貨別に目標を設定可能。</li>
                 </ul>
             </div>
 
             <div class="space-y-3 pt-2">
-                <h4 id="lbl-manual-backup-title" class="text-xs font-bold uppercase tracking-wider text-slate-400">Exportar & Importar Manual</h4>
+                <h4 id="lbl-manual-backup-title" class="text-xs font-bold uppercase tracking-wider text-slate-400">手動エクスポート・インポート</h4>
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="exportBackup()" class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition shadow-sm">
                         <i class="fa-solid fa-file-export"></i>
-                        <span id="lbl-btn-export-json">Exportar JSON</span>
+                        <span id="lbl-btn-export-json">JSON出力</span>
                     </button>
 
                     <label for="import-json-input" class="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-2.5 px-3 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-import"></i>
-                        <span id="lbl-btn-import-json">Importar JSON</span>
+                        <span id="lbl-btn-import-json">JSON取込</span>
                     </label>
                     <input type="file" id="import-json-input" accept=".json" onchange="importBackup(event)" class="hidden">
                 </div>
@@ -634,12 +634,12 @@
             <div class="pt-3 border-t border-slate-100 dark:border-slate-700">
                 <button onclick="resetData()" class="w-full flex items-center justify-center gap-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 py-2.5 rounded-xl text-xs font-bold transition border border-rose-200 dark:border-rose-800">
                     <i class="fa-solid fa-rotate-right"></i>
-                    <span id="lbl-btn-reset-data">Restaurar Dados Iniciais</span>
+                    <span id="lbl-btn-reset-data">初期データに戻す</span>
                 </button>
             </div>
 
             <div class="flex justify-end pt-2">
-                <button type="button" onclick="closeModal('modal-settings')" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300">Fechar</button>
+                <button type="button" onclick="closeModal('modal-settings')" class="px-4 py-2 text-sm text-slate-600 dark:text-slate-300">閉じる</button>
             </div>
         </div>
     </div>
@@ -650,20 +650,20 @@
             
             <div class="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-sm" id="save-status-indicator">
                 <i class="fa-solid fa-shield-halved text-emerald-500 text-sm"></i>
-                <span id="lbl-save-status">Dados Salvos Localmente (Entre com Google para Nuvem)</span>
+                <span id="lbl-save-status">ローカル保存済（Googleログインでクラウド同期）</span>
             </div>
 
             <div class="flex items-center gap-4 font-medium">
                 <button onclick="openModal('modal-settings')" class="flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                     <i class="fa-solid fa-gear text-slate-400"></i>
-                    <span id="lbl-footer-settings">Definições de Dados</span>
+                    <span id="lbl-footer-settings">データ設定</span>
                 </button>
 
                 <span class="text-slate-300 dark:text-slate-700">•</span>
 
                 <div class="flex items-center gap-1.5 cursor-default">
                     <i class="fa-solid fa-lock text-slate-400"></i>
-                    <span id="lbl-footer-privacy">Política de Privacidade Local</span>
+                    <span id="lbl-footer-privacy">ローカルプライバシーポリシー</span>
                 </div>
             </div>
 

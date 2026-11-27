@@ -502,7 +502,7 @@ const langDetails = {
     es: { flag: 'https://flagcdn.com/w20/es.png', label: 'ES' }
 };
 
-let currentLang = localStorage.getItem('finc_lang') || 'pt-BR';
+let currentLang = localStorage.getItem('finc_lang') || 'ja';
 let currentCurrency = localStorage.getItem('finc_active_currency') || 'JPY';
 let activeCurrencies = JSON.parse(localStorage.getItem('finc_active_currencies')) || ['JPY', 'BRL'];
 
@@ -529,25 +529,28 @@ const initialMethods = [
 ];
 
 const initialTransactions = [
-    { id: 1, description: 'Salário Exemplo', amount: 280000, currency: 'JPY', date: '2026-11-01', categoryId: 11, paymentMethodId: 3, status: 'paid', isRecurring: true, notes: 'Receita fixa mensal' },
-    { id: 2, description: 'Supermercado Modelo', amount: 12500, currency: 'JPY', date: '2026-11-05', categoryId: 8, paymentMethodId: 1, status: 'paid', isRecurring: false, notes: 'Compras da semana' }
+    { id: 1, description: '給与（例）', amount: 285000, currency: 'JPY', date: '2026-11-01', categoryId: 11, paymentMethodId: 3, status: 'paid', isRecurring: true, notes: '毎月の固定収入（例）' },
+    { id: 2, description: '家賃（例）', amount: 68000, currency: 'JPY', date: '2026-11-03', categoryId: 1, paymentMethodId: 3, status: 'paid', isRecurring: true, notes: '毎月の家賃（例）' },
+    { id: 3, description: 'スーパーマーケット（例）', amount: 14800, currency: 'JPY', date: '2026-11-06', categoryId: 8, paymentMethodId: 1, status: 'paid', isRecurring: false, notes: '週間食料品の買い物（例）' },
+    { id: 4, description: '電気代（例）', amount: 7450, currency: 'JPY', date: '2026-11-10', categoryId: 3, paymentMethodId: 1, status: 'paid', isRecurring: true, notes: '電気料金の引き落とし（例）' },
+    { id: 5, description: 'ガス代（例）', amount: 4200, currency: 'JPY', date: '2026-11-12', categoryId: 2, paymentMethodId: 1, status: 'paid', isRecurring: true, notes: 'ガス料金の引き落とし（例）' },
+    { id: 6, description: '携帯通信費（例）', amount: 3980, currency: 'JPY', date: '2026-11-15', categoryId: 4, paymentMethodId: 1, status: 'paid', isRecurring: true, notes: 'スマートフォン通信費（例）' },
+    { id: 7, description: 'ジム・フィットネス（例）', amount: 7900, currency: 'JPY', date: '2026-11-18', categoryId: 9, paymentMethodId: 1, status: 'pending', isRecurring: true, notes: 'ジムの月会費（例）' },
+    { id: 8, description: '外食・カフェ（例）', amount: 5600, currency: 'JPY', date: '2026-11-22', categoryId: 12, paymentMethodId: 2, status: 'paid', isRecurring: false, notes: 'ランチ・カフェ利用（例）' }
 ];
 
-// =========================================================================
-// 3. DADOS DE CÔMODOS & LISTA DE COMPRAS INTERLIGADOS
-// =========================================================================
 const initialRooms = [
-    { id: 'room_kitchen', name: 'Cozinha', icon: '🍳' },
-    { id: 'room_laundry', name: 'Lavanderia', icon: '🧼' },
-    { id: 'room_bathroom', name: 'Banheiro', icon: '🚿' },
-    { id: 'room_living', name: 'Sala / Geral', icon: '🛋️' }
+    { id: 'room_kitchen', name: 'キッチン', icon: '🍳' },
+    { id: 'room_laundry', name: 'ランドリー', icon: '🧼' },
+    { id: 'room_bathroom', name: 'バスルーム', icon: '🚿' },
+    { id: 'room_living', name: 'リビング・全般', icon: '🛋️' }
 ];
 
 const initialShoppingItems = [
-    { id: 101, name: 'Arroz 5kg', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
-    { id: 102, name: 'Ovos (10 un)', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
-    { id: 103, name: 'Detergente', roomId: 'room_laundry', qty: 1, price: 0, planned: false, inCart: false },
-    { id: 104, name: 'Papel Higiênico', roomId: 'room_bathroom', qty: 1, price: 0, planned: false, inCart: false }
+    { id: 101, name: 'お米 5kg', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 102, name: '卵 (10個パック)', roomId: 'room_kitchen', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 103, name: '食器用洗剤', roomId: 'room_laundry', qty: 1, price: 0, planned: false, inCart: false },
+    { id: 104, name: 'トイレットペーパー', roomId: 'room_bathroom', qty: 1, price: 0, planned: false, inCart: false }
 ];
 
 let categories = JSON.parse(localStorage.getItem('finc_categories')) || initialCategories;
